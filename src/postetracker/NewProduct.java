@@ -50,14 +50,11 @@ public class NewProduct extends javax.swing.JDialog {
 
         jLabel2.setText("Product description:");
 
-        jTextNewCode.setText("jTextNewCode");
         jTextNewCode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextNewCodeActionPerformed(evt);
             }
         });
-
-        jTextNewDesc.setText("jTextNewDesc");
 
         jButton1.setText("Save");
         jButton1.addActionListener(new java.awt.event.ActionListener() {

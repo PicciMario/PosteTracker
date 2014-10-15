@@ -103,6 +103,7 @@ public class DBManager {
             stmt.setString(1, code);
             stmt.setString(2, status);
             stmt.execute();
+            conn.commit();
         }
         catch (SQLException e){
             System.out.println(e.toString());
@@ -115,6 +116,7 @@ public class DBManager {
             stmt.setString(1, product.getCode());
             stmt.setString(2, product.getDesc());
             stmt.execute();
+            conn.commit();
         }
         catch (SQLException e){
             System.out.println(e.toString());

@@ -84,17 +84,11 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="jTextNewCode">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="jTextNewCode"/>
-      </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jTextNewCodeActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="jTextNewDesc">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="jTextNewDesc"/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="jButton1">
       <Properties>

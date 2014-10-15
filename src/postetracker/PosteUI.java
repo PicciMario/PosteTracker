@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
@@ -126,8 +127,8 @@ public class PosteUI extends javax.swing.JFrame {
      * Creates the produce list.
      */
     public static void initList(){
-        String[] codes = new String[]{"RI001384165CN", "RL040393084CN", "RO400390995CN", "RG058010681CN", "RG053889040CN", "RJ210248923CN"};
-        String[] descs = new String[]{"Schermo GoPro", "Velcro Patch: Zombie Outbreak Response Team", "Tasca Cellulare", "Portachiavi tattico", "Ganci MOLLE", "Tasche cellulare (2x)"};
+        //String[] codes = new String[]{"RI001384165CN", "RL040393084CN", "RO400390995CN", "RG058010681CN", "RG053889040CN", "RJ210248923CN"};
+        //String[] descs = new String[]{"Schermo GoPro", "Velcro Patch: Zombie Outbreak Response Team", "Tasca Cellulare", "Portachiavi tattico", "Ganci MOLLE", "Tasche cellulare (2x)"};
      
         productList = dbManager.retrieveProductList();
         
@@ -205,7 +206,7 @@ public class PosteUI extends javax.swing.JFrame {
                 String newStatus = masthead.get(i).select("li").text();
                 boolean wasNew = product.addStatus(newStatus);
                 if (wasNew) {
-                    System.out.println("New status " + newStatus + " for product " + product.getDesc());
+                    JOptionPane.showMessageDialog(null, "Nuovo status per prodotto: " + product.getDesc());
                     dbManager.storeNewStatus(product.getCode(), newStatus);
                 }
             }
