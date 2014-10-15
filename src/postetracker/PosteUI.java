@@ -8,11 +8,9 @@ package postetracker;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,24 +23,28 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import postetracker.tools.DBManager;
 import postetracker.tools.MultiLineCellRenderer;
 import postetracker.tools.MyTableModel;
 
 /**
- *
+ * Main class of Poste Tracker.
  * @author m.piccinelli
  */
 public class PosteUI extends javax.swing.JFrame {
 
     static List<Product> productList;
     static String url = "http://www.poste.it/online/dovequando/ricerca.do";
+    static DBManager dbManager;
     
     /**
      * Creates new form PosteUI
      */
     public PosteUI() {
+        
+        dbManager = new DBManager();
+        
         initComponents();
         
         initList();
@@ -61,6 +63,10 @@ public class PosteUI extends javax.swing.JFrame {
         jTableLista.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent event) {
                 if (!event.getValueIsAdjusting()){
+                    if (jTableLista.getSelectedRow() == -1) {
+                        jTextAreaDescription.setText("");
+                        return;
+                    }
                     Product prod = productList.get(jTableLista.getSelectedRow());
                     String textarea = "";
                     for (ProductStatus status : prod.getStatuses()){
@@ -73,13 +79,20 @@ public class PosteUI extends javax.swing.JFrame {
         
     }
     
+    /**
+     * Updates the main UI by re-reading data from the product list.
+     */
     public void updateUI(){
         update();
         ((MyTableModel) jTableLista.getModel()).setData(productList.toArray(new Product[0]));
         jTableLista.repaint();
+        jTableLista.clearSelection();
         jTextAreaDescription.setText("");
     }
     
+    /**
+     * Calls the updateUI() procedure and meanwhile displays a "plase wait" form
+     */
     public static void update() {
         final JDialog d = new JDialog();
         JPanel p1 = new JPanel(new GridBagLayout());
@@ -94,7 +107,7 @@ public class PosteUI extends javax.swing.JFrame {
             
             @Override
             protected Void doInBackground() throws InterruptedException {
-                aggiornaLista();
+                updateProductList();
                 return null;
             }
             
@@ -107,34 +120,36 @@ public class PosteUI extends javax.swing.JFrame {
         d.setVisible(true);
     }    
     
-    
+    /**
+     * Creates the produce list.
+     */
     public static void initList(){
         String[] codes = new String[]{"RI001384165CN", "RL040393084CN", "RO400390995CN", "RG058010681CN", "RG053889040CN", "RJ210248923CN"};
         String[] descs = new String[]{"Schermo GoPro", "Velcro Patch: Zombie Outbreak Response Team", "Tasca Cellulare", "Portachiavi tattico", "Ganci MOLLE", "Tasche cellulare (2x)"};
      
-        // creazione lista con prodotti
-        productList = new ArrayList<>();
-        for (int i = 0; i < codes.length; i++){
-            Product element = new Product();
-            element.setCode(codes[i]);
-            element.setDesc(descs[i]);
-            productList.add(element);
-        }        
+        productList = dbManager.retrieveProductList();
         
     }
     
-    public static void aggiornaLista(){
+    /**
+     * Updates each product in the product list by retrieving the data from the
+     * remote page. The product list is then sorted by first date.
+     */
+    public static void updateProductList(){
         
         for (Product prod : productList){
-            leggiDettagli(prod);
+            updateProduct(prod);
         }   
         
         Collections.sort(productList, new ProductCompareByDate());
     }
     
-    public static void leggiDettagli(Product product){
-        
-        product.clearStatuses();
+    /**
+     * Updates a single product by retrieving the tracking data from the remote
+     * page.
+     * @param product The Product instance to update
+     */
+    public static void updateProduct(Product product){
         
         String urlDettagli = "http://www.poste.it/online/dovequando/ricerca.do?action=dettaglioCorrispondenza&mpdate=0&mpcode=" + product.getCode();
         
@@ -169,7 +184,12 @@ public class PosteUI extends javax.swing.JFrame {
         }
         else{
             for (int i = 1; i < masthead.size(); i++){
-                product.addStatus(masthead.get(i).select("li").text());
+                String newStatus = masthead.get(i).select("li").text();
+                boolean wasNew = product.addStatus(newStatus);
+                if (wasNew) {
+                    System.out.println("New status " + newStatus + " for product " + product.getDesc());
+                    dbManager.storeNewStatus(product.getCode(), newStatus);
+                }
             }
         }
         
@@ -244,6 +264,10 @@ public class PosteUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Called when the user pushes the "refresh" button.
+     * @param evt 
+     */
     private void jButtonRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRefreshActionPerformed
         updateUI();
     }//GEN-LAST:event_jButtonRefreshActionPerformed

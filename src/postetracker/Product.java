@@ -41,14 +41,26 @@ public class Product {
         return code;
     }
     
-    public void addStatus(String newStatus){
-        statusList.add(new ProductStatus(newStatus));
-        Collections.sort(statusList, new ProductStatusCompareByDate());
+    public boolean addStatus(String newStatus){
+        
+        boolean already = false;
+        
+        ProductStatus newStat = new ProductStatus(newStatus);
+        for (ProductStatus stat : statusList){
+            boolean thisAlready = stat.equals(newStat);
+            if (thisAlready) {
+                already = true;
+                break;
+            }
+        }
+        
+        if (!already){
+            statusList.add(new ProductStatus(newStatus));
+            Collections.sort(statusList, new ProductStatusCompareByDate());
+        }
+        
+        return !already;
     }    
-    
-    public void clearStatuses(){
-        statusList.clear();
-    }
     
     public String getStatus(){
         if (statusList.size()>0){
@@ -174,6 +186,16 @@ class ProductStatus{
     public String getStatus(){
         return status;
     }
+
+    public boolean equals(ProductStatus stat) {
+        
+        if (stat.getDate().equals(date) && stat.getStatus().equals(getStatus()))
+            return true;
+        else
+            return false;
+        
+    }
+    
 
     
     
