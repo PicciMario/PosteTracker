@@ -21,6 +21,7 @@ import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -91,7 +92,8 @@ public class PosteUI extends javax.swing.JFrame {
     }
     
     /**
-     * Calls the updateUI() procedure and meanwhile displays a "plase wait" form
+     * Calls the updateProductList() procedure and meanwhile displays a 
+     * "please wait" popup.
      */
     public static void update() {
         final JDialog d = new JDialog();
@@ -128,6 +130,25 @@ public class PosteUI extends javax.swing.JFrame {
         String[] descs = new String[]{"Schermo GoPro", "Velcro Patch: Zombie Outbreak Response Team", "Tasca Cellulare", "Portachiavi tattico", "Ganci MOLLE", "Tasche cellulare (2x)"};
      
         productList = dbManager.retrieveProductList();
+        
+    }
+    
+    public void newProduct(Product product){
+        
+        dbManager.storeNewProduct(product);
+        
+        updateProduct(product);
+        
+        productList.add(product);
+        
+        Collections.sort(productList, new ProductCompareByDate());
+        ((MyTableModel) jTableLista.getModel()).setData(productList.toArray(new Product[0]));
+        
+        MyTableModel dm = (MyTableModel)jTableLista.getModel();
+        dm.fireTableDataChanged(); 
+        
+        jTableLista.clearSelection();
+        jTextAreaDescription.setText(""); 
         
     }
     
@@ -179,10 +200,7 @@ public class PosteUI extends javax.swing.JFrame {
         Document doc = Jsoup.parse(document);
         Elements masthead = doc.select("div.statoDoveQuandoLavorazione ul");
         
-        if (masthead.isEmpty()){
-            product.addStatus("Unknown");
-        }
-        else{
+        if (!masthead.isEmpty()){
             for (int i = 1; i < masthead.size(); i++){
                 String newStatus = masthead.get(i).select("li").text();
                 boolean wasNew = product.addStatus(newStatus);
@@ -209,6 +227,7 @@ public class PosteUI extends javax.swing.JFrame {
         jButtonRefresh = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextAreaDescription = new javax.swing.JTextArea();
+        jButtonNewCode = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Poste Tracker <mario.piccinelli@gmail.com>");
@@ -237,6 +256,13 @@ public class PosteUI extends javax.swing.JFrame {
         jTextAreaDescription.setRows(3);
         jScrollPane1.setViewportView(jTextAreaDescription);
 
+        jButtonNewCode.setText("New code");
+        jButtonNewCode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonNewCodeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -245,15 +271,21 @@ public class PosteUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 668, Short.MAX_VALUE)
-                    .addComponent(jButtonRefresh, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButtonRefresh)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonNewCode, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButtonRefresh)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonRefresh)
+                    .addComponent(jButtonNewCode))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -271,6 +303,11 @@ public class PosteUI extends javax.swing.JFrame {
     private void jButtonRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRefreshActionPerformed
         updateUI();
     }//GEN-LAST:event_jButtonRefreshActionPerformed
+
+    private void jButtonNewCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewCodeActionPerformed
+        NewProduct dialog = new NewProduct(this, true);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_jButtonNewCodeActionPerformed
 
     /**
      * @param args the command line arguments
@@ -311,6 +348,7 @@ public class PosteUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonNewCode;
     private javax.swing.JButton jButtonRefresh;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

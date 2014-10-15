@@ -109,4 +109,16 @@ public class DBManager {
         }        
     }
     
+    public void storeNewProduct(Product product){
+        try{
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO products(code, desc) VALUES (?,?);");
+            stmt.setString(1, product.getCode());
+            stmt.setString(2, product.getDesc());
+            stmt.execute();
+        }
+        catch (SQLException e){
+            System.out.println(e.toString());
+        }         
+    }
+    
 }
