@@ -23,10 +23,9 @@ import java.util.regex.Pattern;
 public class Product {
     
     private String code = "";
-    private String status = "";
-    private Date date = new Date(0);
     private String desc = "";
     private List<ProductStatus> statusList = new ArrayList<>();
+    private int archive = 0;
     
     private final SimpleDateFormat dateFormatParse = new SimpleDateFormat("dd-MMM-yyyy");
     private final SimpleDateFormat dateFormatPrint = new SimpleDateFormat("dd/MM/yyyy");
@@ -153,6 +152,28 @@ public class Product {
      */
     public List<ProductStatus> getStatuses(){
         return statusList;
+    }
+    
+    public int getArchiveStatus(){
+        return archive;
+    }
+    
+    public void setArchiveStatus(int newStatus){
+        archive = newStatus;
+    }
+    
+    public boolean isArchived(){
+        if (archive == 0)
+            return false;
+        else
+            return true;
+    }
+    
+    public void setArchived(boolean newStatus){
+        if (newStatus)
+            archive = 1;
+        else
+            archive = 0;
     }
     
     @Override

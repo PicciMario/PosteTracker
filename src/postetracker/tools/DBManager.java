@@ -44,14 +44,15 @@ public class DBManager {
         try{
             try (Statement stmt = conn.createStatement()) {
                 String sql;
-                sql = "CREATE TABLE PRODUCTS ("
-                        + " CODE TEXT PRIMARY KEY NOT NULL,"
-                        + " DESC TEXT NOT NULL"
+                sql = "CREATE TABLE products ("
+                        + " code TEXT PRIMARY KEY NOT NULL,"
+                        + " desc TEXT NOT NULL,"
+                        + " archivestatus INTEGER DEFAULT 0"
                         + ");";
                 stmt.executeUpdate(sql);
                 sql = "CREATE TABLE statuses ("
-                        + " CODE TEXT NOT NULL,"
-                        + " STATUS TEXT NOT NULL"
+                        + " code TEXT NOT NULL,"
+                        + " status TEXT NOT NULL"
                         + ");";
                 stmt.executeUpdate(sql);                
             }
@@ -71,6 +72,7 @@ public class DBManager {
                     Product prod = new Product();
                     prod.setCode(rs.getString("code"));
                     prod.setDesc(rs.getString("desc"));
+                    prod.setArchiveStatus(rs.getInt("archivestatus"));
                     productList.add(prod);
                 }
             }
@@ -103,24 +105,42 @@ public class DBManager {
             stmt.setString(1, code);
             stmt.setString(2, status);
             stmt.execute();
-            conn.commit();
         }
         catch (SQLException e){
             System.out.println(e.toString());
         }        
     }
     
-    public void storeNewProduct(Product product){
+    public int storeNewProduct(Product product){
+        
+        try{
+            PreparedStatement stmt = conn.prepareStatement("SELECT count(*) FROM products WHERE code=?;");
+            stmt.setString(1, product.getCode());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.getInt(1) > 0){
+                stmt.close();
+                return 2;
+            }
+            stmt.close();
+        }
+        catch (SQLException e){
+            System.out.println(e.toString());
+            return 1;
+        }
+        
         try{
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO products(code, desc) VALUES (?,?);");
             stmt.setString(1, product.getCode());
             stmt.setString(2, product.getDesc());
             stmt.execute();
-            conn.commit();
+            stmt.close();
         }
         catch (SQLException e){
             System.out.println(e.toString());
-        }         
+            return 1;
+        }  
+        
+        return 0;
     }
     
     public void deleteProduct(Product product){
@@ -139,6 +159,35 @@ public class DBManager {
         catch (SQLException e){
             System.out.println(e.toString());
         }         
+    }
+    
+    public void archiveProduct(Product product){
+        try{
+            PreparedStatement stmt = conn.prepareStatement("SELECT archivestatus FROM products WHERE code = ?;");
+            stmt.setString(1, product.getCode());
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()){
+                int actualstatus = rs.getInt("archivestatus");
+                int newstatus = 0;
+                if (actualstatus == 0){
+                    newstatus = 1;
+                }
+                else {
+                    newstatus = 0;
+                }
+                
+                stmt = conn.prepareStatement("UPDATE products SET archivestatus=? WHERE code=?;");
+                stmt.setInt(1, newstatus);
+                stmt.setString(2, product.getCode());
+                stmt.executeUpdate();
+            }
+
+            stmt.close();
+        }
+        catch (SQLException e){
+            System.out.println(e.toString());
+        }          
     }
     
 }

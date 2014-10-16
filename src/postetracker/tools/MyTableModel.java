@@ -15,6 +15,10 @@ import postetracker.Product;
 public class MyTableModel extends AbstractTableModel {
     private final String[] columnNames = new String[]{"Codice", "Descrizione/stato"};
     private Product[] data = new Product[]{};
+    
+    public Product getProductByRow(int row){
+        return data[row];
+    }
 
     public void setData(Product[] lista){
         this.data = lista;

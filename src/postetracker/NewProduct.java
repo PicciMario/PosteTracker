@@ -43,12 +43,12 @@ public class NewProduct extends javax.swing.JDialog {
         jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("New shipment code");
+        setTitle("Nuovo codice");
         setResizable(false);
 
-        jLabel1.setText("Tracking code:");
+        jLabel1.setText("Codice tracking:");
 
-        jLabel2.setText("Product description:");
+        jLabel2.setText("Commento:");
 
         jTextNewCode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -56,14 +56,14 @@ public class NewProduct extends javax.swing.JDialog {
             }
         });
 
-        jButton1.setText("Save");
+        jButton1.setText("Salva");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
             }
         });
 
-        jButton2.setText("Cancel");
+        jButton2.setText("Annulla");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -116,14 +116,14 @@ public class NewProduct extends javax.swing.JDialog {
         String newCode = jTextNewCode.getText();
         String newDesc = jTextNewDesc.getText();
         if (newCode.length() == 0 || newDesc.length() == 0){
-            JOptionPane.showMessageDialog(this, "Code and description cannot be blank.");
+            JOptionPane.showMessageDialog(this, "Codice e descrizione non possono essere lasciati in bianco.");
         }
         else{
             Product prod = new Product();
             prod.setCode(newCode);
             prod.setDesc(newDesc);
-            posteParent.newProduct(prod);
-            JOptionPane.showMessageDialog(this, "Nuovo prodotto inserito.");
+            int result = posteParent.newProduct(prod);
+            if (result == 0) JOptionPane.showMessageDialog(this, "Nuovo prodotto inserito.");
             this.dispose();
         }
         
