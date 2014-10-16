@@ -172,7 +172,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
                         jTextAreaDescription.setText("");
                         return;
                     }
-                    Product prod = productList.get(jTableLista.getSelectedRow());
+                    
+                    MyTableModel model = (MyTableModel)jTableLista.getModel();
+                    Product prod = model.getProductByRow(jTableLista.getSelectedRow());
                     String textarea = "";
                     for (ProductStatus status : prod.getStatuses()){
                         textarea += (status.getDateString() + " -> " + status.getStatus() + "\n");
@@ -407,6 +409,10 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         // parsing 
         Document doc = Jsoup.parse(document);
         Elements masthead = doc.select("div.statoDoveQuandoLavorazione ul");
+        
+        if (masthead.isEmpty()){
+            masthead = doc.select("div.statoDoveQuandoConsegnato ul");
+        }
         
         if (!masthead.isEmpty()){
             for (int i = 1; i < masthead.size(); i++){
