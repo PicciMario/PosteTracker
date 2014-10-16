@@ -7,10 +7,20 @@ package postetracker;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -25,6 +35,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -34,6 +45,7 @@ import javax.swing.JTable;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingWorker;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -81,6 +93,11 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         Icon delIcon = new ImageIcon(cl.getResource("resources/delete.gif"));
         Icon refreshIcon = new ImageIcon(cl.getResource("resources/refresh.gif"));
         Icon archiveIcon = new ImageIcon(cl.getResource("resources/archive.gif"));
+        
+        URL logoUrl = cl.getResource("resources/logo.png");
+        Toolkit kit = Toolkit.getDefaultToolkit();
+        Image logoImg = kit.createImage(logoUrl);
+        setIconImage(logoImg);
         
         // NEW button
         newButton = new JButton();
@@ -194,14 +211,11 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         }
         updating = true;
         
-        final JDialog d = new JDialog();
-        JPanel p1 = new JPanel(new GridBagLayout());
-        p1.add(new JLabel("Attendere..."), new GridBagConstraints());
-        d.getContentPane().add(p1);
-        d.setSize(200, 100);
-        d.setTitle("Please wait...");
-        d.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        d.setModal(true);
+        // glass panel over frame
+        WaitingGlassPane panel = new WaitingGlassPane();
+        panel.setOpaque(false);
+        setGlassPane(panel);
+        panel.setVisible(true);  
         
         SwingWorker<?, ?> worker = new SwingWorker<Void, Integer>() {
             
@@ -213,12 +227,11 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             
             @Override
             protected void done() {
-                d.dispose();
                 updating = false;
+                panel.setVisible(false);
             }
         };
         worker.execute();
-        d.setVisible(true);
     }    
     
     /**
@@ -555,6 +568,12 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         
         else if (e.getSource() == refreshButton){
             updateUI();
+            if (timerEnabledCheck.isSelected()){
+                int mins = (int)timerSpinner.getValue();
+                refreshClock.cancel();
+                refreshClock = new Timer();
+                refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
+            }            
         }
         
         else if (e.getSource() == showArchivedCheck){
@@ -609,6 +628,72 @@ class TimerThread extends java.util.TimerTask {
     @Override
     public void run() {
         parent.update();
+    }
+    
+}
+
+
+class WaitingGlassPane extends JPanel implements MouseListener, MouseMotionListener, FocusListener{
+
+    public WaitingGlassPane(){
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        addFocusListener(this);   
+        
+        setLayout(new GridBagLayout());
+        
+        JLabel l = new JLabel();
+        l.setOpaque(true);
+        l.setBackground(Color.GREEN);
+        l.setForeground(Color.BLACK);
+        
+        l.setFont(new Font("Serif", Font.BOLD, 16));
+        
+        l.setText("Aggiornamento in corso.. Attendere...");
+        l.setBorder(new LineBorder(Color.BLACK, 1));
+        
+
+        add(l);
+    }
+    
+    @Override
+    public void setVisible(boolean v) {
+        // Make sure we grab the focus so that key events don't go astray.
+        if (v) {
+            requestFocus();
+        }
+        super.setVisible(v);
+    } 
+    
+    @Override
+    public void mouseClicked(MouseEvent e) {}
+
+    @Override
+    public void mousePressed(MouseEvent e) {}
+
+    @Override
+    public void mouseReleased(MouseEvent e) {}
+
+    @Override
+    public void mouseEntered(MouseEvent e) {}
+
+    @Override
+    public void mouseExited(MouseEvent e) {}
+
+    @Override
+    public void mouseDragged(MouseEvent e) {}
+
+    @Override
+    public void mouseMoved(MouseEvent e) {}
+
+    @Override
+    public void focusGained(FocusEvent e) {}
+
+    @Override
+    public void focusLost(FocusEvent fe) {
+        if (isVisible()) {
+            requestFocus();
+        }
     }
     
 }
