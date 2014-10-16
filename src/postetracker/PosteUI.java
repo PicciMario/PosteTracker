@@ -136,42 +136,100 @@ public class PosteUI extends javax.swing.JFrame {
     
     public void newProduct(Product product){
         
+        // save new product into database
         dbManager.storeNewProduct(product);
         
+        // update product by retrieving data from site
         updateProduct(product);
         
+        // add product to local product list
         productList.add(product);
         
+        // sort updated product list
         Collections.sort(productList, new ProductCompareByDate());
+        
+        // set updated product list as data source for table in main UI
         ((MyTableModel) jTableLista.getModel()).setData(productList.toArray(new Product[0]));
         
+        // update the table
         MyTableModel dm = (MyTableModel)jTableLista.getModel();
         dm.fireTableDataChanged(); 
         
+        // clear table selection
         jTableLista.clearSelection();
         jTextAreaDescription.setText(""); 
         
+    }
+    
+    public void deleteProduct(Product product){
+        
+        String message = "Vuoi cancellare l'elemento " + product.getDesc() + " e tutti i suoi aggiornamenti? \nL'operazione è irreversibile!";
+        
+        int reply = JOptionPane.showConfirmDialog(null, message, "Conferma cancellazione", JOptionPane.YES_NO_OPTION);
+        
+        if (reply == JOptionPane.YES_OPTION) {
+            
+            // delete from database
+            dbManager.deleteProduct(product);
+            
+            // deleted from internal product list
+            productList.remove(product);
+
+            // set updated product list as data source for table in main UI
+            ((MyTableModel) jTableLista.getModel()).setData(productList.toArray(new Product[0]));
+
+            // update the table
+            MyTableModel dm = (MyTableModel) jTableLista.getModel();
+            dm.fireTableDataChanged();
+
+            // clear table selection
+            jTableLista.clearSelection();
+            jTextAreaDescription.setText("");
+            
+        }
+        else {
+           return;
+        }
     }
     
     /**
      * Updates each product in the product list by retrieving the data from the
      * remote page. The product list is then sorted by first date.
      */
-    public static void updateProductList(){
+    public static String[] updateProductList(){
+        
+        List<String> updates = new ArrayList<>();
         
         for (Product prod : productList){
-            updateProduct(prod);
+            String[] prodUpdates = updateProduct(prod);
+            for (String upd : prodUpdates){
+                updates.add(upd);
+            }
         }   
         
         Collections.sort(productList, new ProductCompareByDate());
+        
+        if(updates.size() > 0){
+            String updateString = "Aggiornamenti di stato: \n";
+            for (String updateStringElem : updates){
+                updateString += "- " + updateStringElem + "\n";
+            }            
+            JOptionPane.showMessageDialog(null, updateString);
+        }
+        
+        return updates.toArray(new String[0]);
+        
     }
     
     /**
      * Updates a single product by retrieving the tracking data from the remote
      * page.
      * @param product The Product instance to update
+     * @return An array of Strings with the new status updates.
      */
-    public static void updateProduct(Product product){
+    public static String[] updateProduct(Product product){
+        
+        List<String> updates = new ArrayList<>();
         
         String urlDettagli = "http://www.poste.it/online/dovequando/ricerca.do?action=dettaglioCorrispondenza&mpdate=0&mpcode=" + product.getCode();
         
@@ -193,8 +251,8 @@ public class PosteUI extends javax.swing.JFrame {
             }
             
         } catch (Exception e){
-            product.addStatus("Errore durante lettura status");
-            return;
+            System.out.println("Errore durante lettura status: " + e.toString());
+            return updates.toArray(new String[0]);
         }        
         
         // parsing 
@@ -206,11 +264,13 @@ public class PosteUI extends javax.swing.JFrame {
                 String newStatus = masthead.get(i).select("li").text();
                 boolean wasNew = product.addStatus(newStatus);
                 if (wasNew) {
-                    JOptionPane.showMessageDialog(null, "Nuovo status per prodotto: " + product.getDesc());
                     dbManager.storeNewStatus(product.getCode(), newStatus);
+                    updates.add(product.getDesc() + ": " + newStatus);
                 }
             }
         }
+        
+        return updates.toArray(new String[0]);
         
     }
 
@@ -229,6 +289,7 @@ public class PosteUI extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextAreaDescription = new javax.swing.JTextArea();
         jButtonNewCode = new javax.swing.JButton();
+        jButtonDelete = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Poste Tracker <mario.piccinelli@gmail.com>");
@@ -264,6 +325,13 @@ public class PosteUI extends javax.swing.JFrame {
             }
         });
 
+        jButtonDelete.setText("Delete");
+        jButtonDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDeleteActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -277,6 +345,8 @@ public class PosteUI extends javax.swing.JFrame {
                         .addComponent(jButtonRefresh)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonNewCode, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonDelete)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -286,7 +356,8 @@ public class PosteUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonRefresh)
-                    .addComponent(jButtonNewCode))
+                    .addComponent(jButtonNewCode)
+                    .addComponent(jButtonDelete))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -309,6 +380,17 @@ public class PosteUI extends javax.swing.JFrame {
         NewProduct dialog = new NewProduct(this, true);
         dialog.setVisible(true);
     }//GEN-LAST:event_jButtonNewCodeActionPerformed
+
+    private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
+        
+        // get selected product
+        if (jTableLista.getSelectedRow() == -1) {
+            return;
+        }
+        Product prod = productList.get(jTableLista.getSelectedRow());
+        
+        deleteProduct(prod);
+    }//GEN-LAST:event_jButtonDeleteActionPerformed
 
     /**
      * @param args the command line arguments
@@ -339,6 +421,7 @@ public class PosteUI extends javax.swing.JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 PosteUI poste = new PosteUI();
                 poste.setVisible(true);
@@ -349,6 +432,7 @@ public class PosteUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonDelete;
     private javax.swing.JButton jButtonNewCode;
     private javax.swing.JButton jButtonRefresh;
     private javax.swing.JScrollPane jScrollPane1;

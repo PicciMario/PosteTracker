@@ -123,4 +123,22 @@ public class DBManager {
         }         
     }
     
+    public void deleteProduct(Product product){
+        try{
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM products WHERE code=?;");
+            stmt.setString(1, product.getCode());
+            stmt.execute();
+            
+            stmt = conn.prepareStatement("DELETE FROM statuses WHERE code=?;");
+            stmt.setString(1, product.getCode());
+            stmt.execute();            
+            
+            conn.commit();
+            stmt.close();
+        }
+        catch (SQLException e){
+            System.out.println(e.toString());
+        }         
+    }
+    
 }
