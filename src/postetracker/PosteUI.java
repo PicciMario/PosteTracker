@@ -64,7 +64,7 @@ import postetracker.tools.MyTableModel;
  * @author m.piccinelli
  */
 public class PosteUI extends javax.swing.JFrame implements ActionListener, ChangeListener {
-
+    
     static List<Product> productList;
     static String url = "http://www.poste.it/online/dovequando/ricerca.do";
     static DBManager dbManager;
@@ -79,6 +79,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
      * Creates new form PosteUI
      */
     public PosteUI() {
+        
+        System.out.println("yeah");
         
         dbManager = new DBManager();
         

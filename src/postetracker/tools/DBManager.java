@@ -36,6 +36,7 @@ public class DBManager {
             if (!exist) initStructure();
         } catch (ClassNotFoundException | SQLException e) {
             System.out.println(e.toString());
+            System.exit(0);
         }
             
     }
