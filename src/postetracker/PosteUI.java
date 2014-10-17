@@ -438,15 +438,27 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jToolBar1 = new javax.swing.JToolBar();
+        jLabelStatusBar = new javax.swing.JLabel();
+        jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTableLista = new javax.swing.JTable();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextAreaDescription = new javax.swing.JTextArea();
-        jToolBar1 = new javax.swing.JToolBar();
-        jLabelStatusBar = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Poste Tracker <mario.piccinelli@gmail.com>");
+
+        jToolBar1.setFloatable(false);
+        jToolBar1.setRollover(true);
+
+        jLabelStatusBar.setForeground(java.awt.Color.gray);
+        jLabelStatusBar.setText(" ");
+        jLabelStatusBar.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+
+        jSplitPane1.setDividerLocation(200);
+        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        jSplitPane1.setResizeWeight(1.0);
 
         jTableLista.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -461,18 +473,15 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         ));
         jScrollPane2.setViewportView(jTableLista);
 
+        jSplitPane1.setLeftComponent(jScrollPane2);
+
         jTextAreaDescription.setEditable(false);
         jTextAreaDescription.setColumns(20);
         jTextAreaDescription.setFont(new java.awt.Font("Century", 0, 11)); // NOI18N
         jTextAreaDescription.setRows(4);
         jScrollPane1.setViewportView(jTextAreaDescription);
 
-        jToolBar1.setFloatable(false);
-        jToolBar1.setRollover(true);
-
-        jLabelStatusBar.setForeground(java.awt.Color.gray);
-        jLabelStatusBar.setText(" ");
-        jLabelStatusBar.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        jSplitPane1.setRightComponent(jScrollPane1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -481,10 +490,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 668, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jLabelStatusBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabelStatusBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 653, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -492,10 +500,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 253, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelStatusBar)
                 .addContainerGap())
@@ -547,6 +553,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     private javax.swing.JLabel jLabelStatusBar;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTable jTableLista;
     private javax.swing.JTextArea jTextAreaDescription;
     private javax.swing.JToolBar jToolBar1;
