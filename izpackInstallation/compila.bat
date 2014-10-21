@@ -1,0 +1,1 @@
+"C:\Program Files\IzPack\bin\compile.bat" izpack-compile.txt -b ..\dist -o PosteTrackerInstaller.jar -k standard

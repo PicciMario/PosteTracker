@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<installation version="1.0">
+    <info>
+        <appname>Poste Tracker</appname>
+        <appversion>1.0</appversion>
+		<appsubpath>PosteTracker</appsubpath>
+        <authors>
+            <author name="Mario Piccinelli" email="mario.piccinelli@gmail.com" />
+        </authors>
+        <javaversion>1.6</javaversion>
+        <requiresjdk>no</requiresjdk>
+		<run-privileged/>
+    </info>
+	
+	<variables>
+		<variable name="TargetPanel.dir" value="C:\PosteTracker" />
+	</variables>	
+
+    <guiprefs width="640" height="480" resizable="yes" />
+
+    <locale>
+        <langpack iso3="ita" />
+    </locale>
+	
+	<resources>
+		<res src="..\izpackInstallation\shortcutSpec.xml" id="shortcutSpec.xml"/>
+	</resources>
+	<native type="izpack" name="ShellLink.dll"/>
+	<native type="izpack" name="ShellLink_x64.dll" />	
+
+    <panels>
+        <panel classname="HelloPanel" />
+        <panel classname="TargetPanel"/>        
+        <panel classname="InstallPanel"/>  
+		<panel classname="ShortcutPanel"/>
+        <panel classname="FinishPanel" />
+    </panels>
+
+    <packs>
+        <pack name="Core" required="yes">
+            <description>Core installation files</description>
+            <file src="PosteTracker.jar" targetdir="$INSTALL_PATH" />
+			<file src="lib/" targetdir="$INSTALL_PATH" />
+			<file src="..\izpackInstallation\logo.ico" targetdir="$INSTALL_PATH" />
+        </pack>
+    </packs>
+
+</installation>

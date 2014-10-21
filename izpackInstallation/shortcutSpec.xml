@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+This is the shortcut specification for windows. Its considered default so on
+Systems that are not shortcut compatible the information is taken from here.
+-->
+<shortcuts>
+  <skipIfNotSupported/>
+  
+  <shortcut
+    name="Poste Tracker"
+    target="$INSTALL_PATH\PosteTracker.jar"
+    commandLine=""
+    workingDirectory="$INSTALL_PATH\"
+    description="Poste Tracker"
+    iconFile="$INSTALL_PATH\logo.ico"
+	iconIndex="0"
+    initialState="normal"
+    programGroup="no"
+    desktop="yes"
+    applications="no"
+    startMenu="yes"
+    startup="no">
+	
+  </shortcut>
+</shortcuts>
