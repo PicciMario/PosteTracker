@@ -69,6 +69,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     static String url = "http://www.poste.it/online/dovequando/ricerca.do";
     static DBManager dbManager;
     
+    PosteNewsWindow posteNewsWindow = new PosteNewsWindow(this, false);
+    
     JButton newButton, deleteButton, refreshButton, archiveButton;
     JCheckBox showArchivedCheck, timerEnabledCheck;
     JSpinner timerSpinner;
@@ -79,8 +81,6 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
      * Creates new form PosteUI
      */
     public PosteUI() {
-        
-        System.out.println("yeah");
         
         dbManager = new DBManager();
         
@@ -168,6 +168,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         jTableLista.getColumnModel().getColumn(0).setPreferredWidth(130);
         
         jTableLista.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
             public void valueChanged(ListSelectionEvent event) {
                 if (!event.getValueIsAdjusting()){
                     if (jTableLista.getSelectedRow() == -1) {
@@ -190,6 +191,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         refreshClock = new Timer();
         int mins = (int)timerSpinner.getValue();
         refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
+        //refreshClock.schedule(new TimerThread(this), 5000, 5000);
         
     }
     
@@ -239,12 +241,10 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     }    
     
     /**
-     * Creates the produce list.
+     * Creates the product list.
      */
     public static void initList(){
-        //String[] codes = new String[]{"RI001384165CN", "RL040393084CN", "RO400390995CN", "RG058010681CN", "RG053889040CN", "RJ210248923CN"};
-        //String[] descs = new String[]{"Schermo GoPro", "Velcro Patch: Zombie Outbreak Response Team", "Tasca Cellulare", "Portachiavi tattico", "Ganci MOLLE", "Tasche cellulare (2x)"};
-     
+
         productList = dbManager.retrieveProductList();
         
     }
@@ -363,9 +363,11 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         if(updates.size() > 0){
             String updateString = "Aggiornamenti di stato: \n";
             for (String updateStringElem : updates){
-                updateString += "- " + updateStringElem + "\n";
+                posteNewsWindow.addNews(updateStringElem);
             }            
-            JOptionPane.showMessageDialog(null, updateString);
+            
+            posteNewsWindow.setVisible(true);
+            posteNewsWindow.flash();
         }
         
         jLabelStatusBar.setText("Ultimo aggiornamento " + new SimpleDateFormat("HH:mm dd/MM/yyyy").format(Calendar.getInstance().getTime()));
