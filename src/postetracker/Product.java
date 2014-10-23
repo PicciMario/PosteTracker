@@ -261,6 +261,14 @@ class ProductStatus{
         
     }
     
+    public int daysPassedFrom(Date start){
+        
+        Date end = getDate();
+        if (end == null || start == null) return 0;
+        
+        return (int)((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        
+    }
 
     
     

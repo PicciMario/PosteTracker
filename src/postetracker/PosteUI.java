@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.Callable;
@@ -184,9 +185,16 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
                     MyTableModel model = (MyTableModel)jTableLista.getModel();
                     Product prod = model.getProductByRow(jTableLista.getSelectedRow());
                     String textarea = "";
+                    Date firstDate = null;
                     for (ProductStatus status : prod.getStatuses()){
-                        textarea += (status.getDateString() + " -> " + status.getStatus() + "\n");
+                        if (firstDate == null) firstDate = status.getDate();
+                        textarea += ("Day " + String.format("%03d", status.daysPassedFrom(firstDate)) + ": " + status.getDateString() + " -> " + status.getStatus() + "\n");
                     }
+                    
+                    Date now = new Date();
+                    int passedAsOfToday = (int)((now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+                    
+                    textarea += String.format("%03d", passedAsOfToday) + " days passed as of today...";
                     jTextAreaDescription.setText(textarea.trim());
                 }
             }
@@ -666,6 +674,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             refreshClock = new Timer();
             refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
         }
+        else{
+            refreshClock.cancel();
+        }        
     }
 }
 
