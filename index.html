@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Poste Tracker by PicciMario</title>
+    <title>Poste Tracker</title>
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -45,7 +45,9 @@
 
 <h3>Per chi &egrave stato pensato?</h3>
 
-<p>Il programma &egrave; stato pensato per chi ordina da siti stranieri (<a href="http://www.aliexpress.com">AliExpress</a> e simili) sfruttando la spedizione (solitamente gratuita) mediante raccomandata internazionale e vuole tenere traccia di quali pacchetti stanno arrivando, quali sono fermi alla dogana, quali si sono persi e quali sono puntuali.
+<p>Il programma &egrave; stato pensato per chi ordina da siti stranieri (<a href="http://www.aliexpress.com">AliExpress</a> e simili) sfruttando la spedizione (solitamente gratuita) mediante raccomandata internazionale e vuole tenere traccia di quali pacchetti stanno arrivando, quali sono fermi alla dogana, quali si sono persi e quali sono puntuali.</p>
+
+<p><img src="screen01.png"/></p>
 
 <h3>Da dove arrivano le informazioni?</h3>
 
@@ -62,6 +64,16 @@
 <li> Il programma pu&ograve; mantenere in archivio anche spedizioni ormai, che non sono pi&ugrave; aggiornate ma comunque restano a disposizione per fare statistiche sui tempi di consegna o come promemoria.
 </ul>
 
+
+<h3>Come si usa?</h3>
+<ul>
+<li><strong>Per avviarlo</strong>: dovrebbe essere sufficiente fare doppio click sul file PosteTracker.jar. Se non funziona, probabilmente nel sistema non &egrave; stata installata l'ultima versione di Java (vedi sotto la sezione "cosa mi serve per farlo funzionare").
+<li><strong>Per aggiungere un tracking code</strong>: premi il pulsante "Aggiungi" e nella finestra inserisci il codice e una breve descrizione.
+<li><strong>Per archiviare una spedizione</strong>: seleziona la spedizione nell'elenco e premi il tasto "Archivia". Per vedere nella lista anche gli archiviati, attiva l'opzione "Mostra archiviati" (questi verranno mostrati in grigio). Per dis-archiviare una spedizione archiviata, selezionala e premi ancora il tasto "Archivia".
+<li><strong>Per aggiornare le informazioni</strong>: basta premere il tasto "Aggiorna" per caricare eventuali aggiornamenti dal sito delle Poste per tutti i codici non archiviati (quelli archiviati non vengono analizzati). Se ci sono stati nuovi, questi vengono mostrati in una finestra di notifica. Inoltre, selezionando un elemento nella tabella posso leggere tutti i suoi status nella parte bassa della finestra.
+<li><strong>Devo avere il programma sempre attivo?</strong> Gli status vengono aggiornati solo quando si avvia il programma o quando si preme il tasto "Aggiorna", quindi si, il consiglio è avere il programma sempre attivo con l'aggiornamento automatico attivato (selezionando l'opzione "auto refresh" e impostando un tempo in minuti, vanno benissimo i 30 preimpostati). In alternativa conviene avviare il programma almeno una volta al giorno, per catturare eventuali aggiornamenti (tenete presente che sul sito si possono reperire solo il primo e l'ultimo status, quindi se non vado a leggere uno stato nuovo prima che questo venga rimpiazzato non potr&ograve; recuperarlo).
+</ul>
+
 <h3>Quanto costa?</h3>
 
 <p>Poste Tracker è stato scritto (ed &egrave; mantenuto) come hobby e per esigenze personali. Di conseguenza, ho deciso di rilasciarlo sotto licenza open source in forma gratuita. Ovviamente non d&ograve; alcuna garanzia in merito al suo funzionamento e alla sua manutenzione futura (a meno che qualcuno non voglia pagarmi per farlo, in tal caso si pu&ograve; discuterne)...</p>
@@ -70,32 +82,10 @@
 <p>Il programma è scritto in Java e fornito come file JAR corredato di alcuni archivi. Non richiede alcun tipo di installazione, &egrave; sufficiente estrarre il contenuto del file ZIP in una cartella qualunque. L'unico prerequisito &egrave; avere installato sul proprio sistema il Java Runtime Environment. Se non l'hai installato, lo puoi scaricare gratuitamente dal <a href="https://www.java.com/it/download/manual.jsp">sito ufficiale</a>.</p> 
 <p>Se non sai se hai o meno Java e se questo &egrave; aggiornato, e hai Windows, il modo pi&ugrave; semplice per verificare &egrave; scaricare Poste Tracker e fare doppio click sul file PosteTracker.jar. Se il sistema si lamenta che non &egrave; installato alcun programma per utilizzare il file, o appare un qualche altro errore, probabilmente la cosa si pu&ograve; risolvere installando Java dal link di cui sopra.</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<h3>E se ho qualche problema?</h3>
+Se hai qualche problema, se vuoi suggerire una feature o vuoi segnalare un errore, il mio indirizzo &egrave; <a href="mailto:mario.piccinelli@gmail.com">mario.piccinelli@gmail.com</a>. Tieni presente che questo progetto per me &egrave; un hobby, quindi non posso garantire nulla :-)
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
       </section>
       <footer>
         <p>Project maintained by <a href="https://github.com/PicciMario">PicciMario</a></p>
