@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Postetracker by PicciMario</title>
+    <title>Poste Tracker by PicciMario</title>
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -17,8 +17,8 @@
   <body>
 
       <header>
-        <h1>Postetracker</h1>
-        <p>Italian mail service (Poste Italiane) tracker.</p>
+        <h1>Poste Tracker</h1>
+        <p>Tracker per Raccomandate Internazionali.</p>
       </header>
 
       <div id="banner">
@@ -28,8 +28,7 @@
         <div class="downloads">
           <span>Downloads:</span>
           <ul>
-            <li><a href="https://github.com/PicciMario/PosteTracker/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/PicciMario/PosteTracker/tarball/master" class="button">TAR</a></li>
+            <li><a href="https://github.com/PicciMario/PosteTracker/releases" class="button">Ultima Versione</a></li>
           </ul>
         </div>
       </div><!-- end banner -->
@@ -40,9 +39,36 @@
       </nav>
       <section>
         <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Di che si tratta?</h3>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>Poste Tracker &egrave; un semplice programma per tenere traccia delle proprie spedizioni (per ora solo raccomandate internazionali) senza dover trascrivere ogni volta i codici di tracking sul sito di Poste Italiane.</p>
+
+<h3>Per chi &egrave stato pensato?</h3>
+
+<p>Il programma &egrave; stato pensato per chi ordina da siti stranieri (<a href="http://www.aliexpress.com">AliExpress</a> e simili) sfruttando la spedizione (solitamente gratuita) mediante raccomandata internazionale e vuole tenere traccia di quali pacchetti stanno arrivando, quali sono fermi alla dogana, quali si sono persi e quali sono puntuali.
+
+<h3>Da dove arrivano le informazioni?</h3>
+
+<p>Le informazioni sono recuperate direttamente dalla sezione tracking (DoveQuando) del sito di Poste Italiane. Il mio programma non fa altro che recuperare lo stato delle spedizioni da quella pagina usando i codici di tracking inseriti dall'utente.</p>
+
+<h3>Ma scusa, se le informazioni sono le stesse che trovo sul sito di Poste Italiane, a cosa mi serve un programma?</h3>
+<p>A un sacco di belle cose:</p>
+<ul>
+<li> Posso memorizzare tutti i codici di tracking man mano che mi vengono comunicati dai venditori.
+<li> Non devo inserirli ogni volta nel sito delle Poste.
+<li> Posso avere a colpo d'occhio lo stato di tutti i miei ordini senza doverli andare a cercare a uno a uno.
+<li> A ogni codice posso associare una breve descrizione (mai capitato di vedere che un ordine &egrave; in consegna e impiegare 10 minuti a risalire al prodotto corrispondente?).
+<li> Il programma mantiene in memoria tutti gli status che ha visualizzato nel corso dei giorni, mentre sul sito delle Poste vengono visualizzati solo il primo (tipicamente la partenza del pacchetto dal venditore) e l'ultimo stato disponibile. In questo modo posso anche tenere traccia dei tempi per ciascuna fase.
+<li> Il programma pu&ograve; mantenere in archivio anche spedizioni ormai, che non sono pi&ugrave; aggiornate ma comunque restano a disposizione per fare statistiche sui tempi di consegna o come promemoria.
+</ul>
+
+<h3>Quanto costa?</h3>
+
+<p>Poste Tracker è stato scritto (ed &egrave; mantenuto) come hobby e per esigenze personali. Di conseguenza, ho deciso di rilasciarlo sotto licenza open source in forma gratuita. Ovviamente non d&ograve; alcuna garanzia in merito al suo funzionamento e alla sua manutenzione futura (a meno che qualcuno non voglia pagarmi per farlo, in tal caso si pu&ograve; discuterne)...</p>
+
+<h3>Cosa mi serve per farlo funzionare?</h3>
+<p>Il programma è scritto in Java e fornito come file JAR corredato di alcuni archivi. Non richiede alcun tipo di installazione, &egrave; sufficiente estrarre il contenuto del file ZIP in una cartella qualunque. L'unico prerequisito &egrave; avere installato sul proprio sistema il Java Runtime Environment. Se non l'hai installato, lo puoi scaricare gratuitamente dal <a href="https://www.java.com/it/download/manual.jsp">sito ufficiale</a>.</p> 
+<p>Se non sai se hai o meno Java e se questo &egrave; aggiornato, e hai Windows, il modo pi&ugrave; semplice per verificare &egrave; scaricare Poste Tracker e fare doppio click sul file PosteTracker.jar. Se il sistema si lamenta che non &egrave; installato alcun programma per utilizzare il file, o appare un qualche altro errore, probabilmente la cosa si pu&ograve; risolvere installando Java dal link di cui sopra.</p>
 
 <pre><code>$ cd your_repo_root/repo_name
 $ git fetch origin
