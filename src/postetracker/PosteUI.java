@@ -31,6 +31,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -345,33 +350,63 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     /**
      * Updates each product in the product list by retrieving the data from the
      * remote page. The product list is then sorted by first date.
+     * @return An array of Strings, each one representing a new status found 
+     * during the update process.
      */
     public String[] updateProductList(){
         
+        // the new statuses found during this update process
         List<String> updates = new ArrayList<>();
+
+//        Old version without parallelization
+//        for (Product prod : productList){
+//            if (prod.isArchived()) continue;
+//            String[] prodUpdates = updateProduct(prod);
+//            for (String upd : prodUpdates){
+//                updates.add(upd);
+//            }
+//        }   
         
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        List<Future<String[]>> list = new ArrayList<>();
+
         for (Product prod : productList){
             if (prod.isArchived()) continue;
-            String[] prodUpdates = updateProduct(prod);
-            for (String upd : prodUpdates){
-                updates.add(upd);
-            }
-        }   
+            
+            Callable<String[]> worker = new RetrieveProductData(prod, dbManager);
+            Future<String[]> submit = executor.submit(worker);
+            list.add(submit);
+        }           
         
+        for (Future<String[]> future : list){
+            try{
+            String[] prodUpdates = future.get();
+                for (String productUpdate : prodUpdates){
+                    updates.add(productUpdate);
+                }
+            }
+            catch (InterruptedException | ExecutionException e){
+                System.out.println(e.toString());
+            }
+        }
+        
+        // sort the whole product list by date of the first (chronological) 
+        // update in each of the products.
         Collections.sort(productList, new ProductCompareByDate());
         
+        // if there are new statuses, show them in the PosteNewsWindow
         if(updates.size() > 0){
-            String updateString = "Aggiornamenti di stato: \n";
             for (String updateStringElem : updates){
                 posteNewsWindow.addNews(updateStringElem);
             }            
-            
             posteNewsWindow.setVisible(true);
             posteNewsWindow.flash();
         }
         
+        // set status bar text with the timestamp of the last update (i.e. now)
         jLabelStatusBar.setText("Ultimo aggiornamento " + new SimpleDateFormat("HH:mm dd/MM/yyyy").format(Calendar.getInstance().getTime()));
         
+        // returns the new statuses
         return updates.toArray(new String[0]);
         
     }
@@ -715,4 +750,67 @@ class WaitingGlassPane extends JPanel implements MouseListener, MouseMotionListe
     
 }
 
+
+class RetrieveProductData implements Callable<String[]>{
+
+    Product product;
+    List<String> updates;
+    DBManager dbManager;
+    
+    public RetrieveProductData(Product product, DBManager dbManager){
+        this.product = product;
+        this.dbManager = dbManager;
+        updates = new ArrayList<>();
+    }
+    
+    @Override
+    public String[] call() throws Exception {
+        
+        String urlDettagli = "http://www.poste.it/online/dovequando/ricerca.do?action=dettaglioCorrispondenza&mpdate=0&mpcode=" + product.getCode();
+        
+        String document = "";
+        
+        // acquisizione pagina remota
+        try{
+            URL siteUrl = new URL(urlDettagli);
+            HttpURLConnection conn = (HttpURLConnection) siteUrl.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    document += (line + "\n");
+                }
+            }
+            
+        } catch (Exception e){
+            System.out.println("Errore durante lettura status: " + e.toString());
+            return updates.toArray(new String[0]);
+        }        
+        
+        // parsing 
+        Document doc = Jsoup.parse(document);
+        Elements masthead = doc.select("div.statoDoveQuandoLavorazione ul");
+        
+        if (masthead.isEmpty()){
+            masthead = doc.select("div.statoDoveQuandoConsegnato ul");
+        }
+        
+        if (!masthead.isEmpty()){
+            for (int i = 1; i < masthead.size(); i++){
+                String newStatus = masthead.get(i).select("li").text();
+                boolean wasNew = product.addStatus(newStatus);
+                if (wasNew) {
+                    dbManager.storeNewStatus(product.getCode(), newStatus);
+                    updates.add(product.getDesc() + ": " + newStatus);
+                }
+            }
+        }
+        
+        return updates.toArray(new String[0]);
+    }
+    
+}
 
