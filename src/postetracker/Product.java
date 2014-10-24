@@ -190,6 +190,9 @@ public class Product {
 class ProductCompareByDate implements Comparator<Product> {
     @Override
     public int compare(Product o1, Product o2) {
+        if (o1.getFirstDate() == null || o2.getFirstDate() == null){
+            return 0;
+        }
         return o1.getFirstDate().compareTo(o2.getFirstDate());
     }
 }

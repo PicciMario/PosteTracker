@@ -420,7 +420,12 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         
         // sort the whole product list by date of the first (chronological) 
         // update in each of the products.
-        Collections.sort(productList, new ProductCompareByDate());
+        try{
+            Collections.sort(productList, new ProductCompareByDate());
+        }
+        catch (Exception e){
+            System.out.println(e.toString());
+        }
         
         // if there are new statuses, show them in the PosteNewsWindow
         if(updates.size() > 0){
