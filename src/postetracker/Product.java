@@ -1,30 +1,52 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Poste Tracker
+ * Copyright 2014 Mario Piccinelli <mario.piccinelli@gmail.com>.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
+
 package postetracker;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- *
+ * Represent a single package, with a tracking code, a description and a 
+ * list of statuses.
  * @author m.piccinelli
  */
 public class Product {
     
+    /** The tracking code */
     private String code = "";
+    
+    /** A user-defined description */
     private String desc = "";
+    
+    /** The list of statuses (instances of {@link ProductStatus() ProductStatus()})*/
     private List<ProductStatus> statusList = new ArrayList<>();
+    
+    /** Archive flag (1: product archived) */
     private int archive = 0;
     
     private final SimpleDateFormat dateFormatParse = new SimpleDateFormat("dd-MMM-yyyy");
@@ -37,7 +59,7 @@ public class Product {
     
     /**
      * Set the product code.
-     * @param code 
+     * @param code The new code.
      */
     public void setCode(String code){
         this.code = code;
@@ -50,6 +72,61 @@ public class Product {
     public String getCode(){
         return code;
     }
+    
+    /**
+     * Set the product description. 
+     * @param desc The new description.
+     */    
+    public void setDesc(String desc){
+        this.desc = desc;
+    }
+    
+    /** 
+     * Returns the product description.
+     * @return The product description.
+     */    
+    public String getDesc(){
+        return desc;
+    }    
+    
+    /**
+     * Retrieves the archive status.
+     * @return The archive status (1: archived).
+     */
+    public int getArchiveStatus(){
+        return archive;
+    }
+    
+    /** 
+     * Sets the archive status.
+     * @param newStatus The new status (1: archived).
+     */
+    public void setArchiveStatus(int newStatus){
+        archive = newStatus;
+    }
+    
+    /**
+     * Retrieves the archive status.
+     * @return True if archived, otherwise false.
+     */
+    public boolean isArchived(){
+        if (archive == 0)
+            return false;
+        else
+            return true;
+    }
+    
+    /**
+     * Sets the archive status.
+     * @param newStatus New status (true: archived).
+     */
+    public void setArchived(boolean newStatus){
+        if (newStatus)
+            archive = 1;
+        else
+            archive = 0;
+    }
+    
     
     /**
      * Adds a status to the product statuses. It parses the passed String to
@@ -142,42 +219,12 @@ public class Product {
         return dateFormatPrint.format(getFirstDate());
     }    
     
-    public void setDesc(String desc){
-        this.desc = desc;
-    }
-    
-    public String getDesc(){
-        return desc;
-    }
-    
     /**
      * Returns the statuses list for this product.
      * @return The statuses list for this product.
      */
     public List<ProductStatus> getStatuses(){
         return statusList;
-    }
-    
-    public int getArchiveStatus(){
-        return archive;
-    }
-    
-    public void setArchiveStatus(int newStatus){
-        archive = newStatus;
-    }
-    
-    public boolean isArchived(){
-        if (archive == 0)
-            return false;
-        else
-            return true;
-    }
-    
-    public void setArchived(boolean newStatus){
-        if (newStatus)
-            archive = 1;
-        else
-            archive = 0;
     }
     
     @Override
@@ -187,6 +234,11 @@ public class Product {
     
 }
 
+/**
+ * An utility class used to define the sort order of a list of Products
+ * (by the first date available among their statuses, in chronological order).
+ * @author m.piccinelli
+ */
 class ProductCompareByDate implements Comparator<Product> {
     @Override
     public int compare(Product o1, Product o2) {

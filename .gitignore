@@ -1,0 +1,4 @@
+dist/
+build/
+postetracker.db
+nbproject/private

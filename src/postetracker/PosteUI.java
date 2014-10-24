@@ -1,16 +1,30 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Poste Tracker
+ * Copyright 2014 Mario Piccinelli <mario.piccinelli@gmail.com>.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
+
 package postetracker;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -29,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.Callable;
@@ -41,8 +54,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -58,7 +69,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -77,6 +87,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     static String url = "http://www.poste.it/online/dovequando/ricerca.do";
     static DBManager dbManager;
     
+    /** Semaphone for the update process */
+    public boolean updating = false;
+    
     PosteNewsWindow posteNewsWindow = new PosteNewsWindow(this, false);
     
     JButton newButton, deleteButton, refreshButton, archiveButton;
@@ -94,7 +107,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         
         initComponents();
         
-        initList();
+        // loads product list from SQLite database
+        productList = dbManager.retrieveProductList();
         
         // Get current classloader
         ClassLoader cl = this.getClass().getClassLoader();
@@ -225,7 +239,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     }
     
     /**
-     * Updates the main UI by re-reading data from the product list.
+     * Updates the product list AND updates the UI. It does this by calling in
+     * sequence {@link update() update()} and 
+     * {@link updateTableContent() updateTableContent}.
      */
     public void updateUI(){
         update();
@@ -235,8 +251,12 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     /**
      * Calls the updateProductList() procedure and meanwhile displays a 
      * "please wait" popup.
+     * 
+     * <p>Be aware that this function alone does not update the table in the main
+     * UI. This must be accomplished by calling 
+     * {@link updateTableContent() updateTableContent()} (or just by calling 
+     * {@link updateUI() updateUI()} which in turn calls both).</p>
      */
-    public boolean updating = false;
     public void update() {
         
         // semaphore for update process
@@ -269,15 +289,13 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         worker.execute();
     }    
     
-    /**
-     * Creates the product list.
-     */
-    public static void initList(){
 
-        productList = dbManager.retrieveProductList();
-        
-    }
-    
+    /**
+     * Inserts a new {@link Product Product} into the local list and the SQLite
+     * database, and refreshes the main UI.
+     * @param product The new product
+     * @return 0 if insertion successful, 1 otherwise.
+     */
     public int newProduct(Product product){
         
         // save new product into database
@@ -308,6 +326,16 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         
     }
     
+    /**
+     * Updates the main table content by:
+     * <ul>
+     * <li> Build the list of products to display by filtering the product list
+     * according to the "show archived" checkbox.
+     * <li> Send the new list to the JTable model.
+     * <li> Updating the table.
+     * <li> Clearing the selection and the details table underneath.
+     * </ul>
+     */
     public void updateTableContent(){
         
         List<Product> filteredProductList = new ArrayList<>();
@@ -339,6 +367,12 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         
     }
     
+    /**
+     * Removes an existing product from both the main UI and the database
+     * (after asking the user for confirmation). Then calls 
+     * {@link updateTableContent() updateTableContent()}.
+     * @param product The existing {@link Product Product} to delete.
+     */
     public void deleteProduct(Product product){
         
         String message = "Vuoi cancellare l'elemento " + product.getDesc() + " e tutti i suoi aggiornamenti? \nL'operazione è irreversibile!";
@@ -359,6 +393,12 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
 
     }
     
+    /**
+     * Toggles the "archive" flag of a product, both in the in-app list
+     * and in the database. Then calls
+     * {@link updateTableContent() updateTableContent()}.
+     * @param product The product to toggle.
+     */
     public void archiveProduct(Product product){
         
         // delete from database
@@ -385,15 +425,6 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         
         // the new statuses found during this update process
         List<String> updates = new ArrayList<>();
-
-//        Old version without parallelization
-//        for (Product prod : productList){
-//            if (prod.isArchived()) continue;
-//            String[] prodUpdates = updateProduct(prod);
-//            for (String upd : prodUpdates){
-//                updates.add(upd);
-//            }
-//        }   
         
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<Future<String[]>> list = new ArrayList<>();
@@ -712,6 +743,10 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     }
 }
 
+/**
+ * The timer used automatically to call {@link updateUI() updateUI()}.
+ * @author m.piccinelli
+ */
 class TimerThread extends java.util.TimerTask {
 
     PosteUI parent;
@@ -722,12 +757,17 @@ class TimerThread extends java.util.TimerTask {
     
     @Override
     public void run() {
-        parent.update();
+        parent.updateUI();
     }
     
 }
 
-
+/**
+ * The panel used to block the main UI while updating, also showing a 
+ * colored label telling the user to wait for the completion of the update 
+ * process.
+ * @author m.piccinelli
+ */
 class WaitingGlassPane extends JPanel implements MouseListener, MouseMotionListener, FocusListener{
 
     public WaitingGlassPane(){
@@ -793,19 +833,37 @@ class WaitingGlassPane extends JPanel implements MouseListener, MouseMotionListe
     
 }
 
-
+/**
+ * A {@link Callable Callable} task which refreshes a Product by retrieving
+ * the tracking page from the website and parsing it.
+ * @author m.piccinelli
+ */
 class RetrieveProductData implements Callable<String[]>{
 
     Product product;
     List<String> updates;
     DBManager dbManager;
     
+    /**
+     * Creates a new {@link RetrieveProductData RetrieveProductData}.
+     * @param product The {@link Product Product} to update.
+     * @param dbManager The utility object use to manage the connection to the 
+     * SQLite database.
+     */
     public RetrieveProductData(Product product, DBManager dbManager){
         this.product = product;
         this.dbManager = dbManager;
         updates = new ArrayList<>();
     }
     
+    /**
+     * Runs the update process to the {@link Product Product} set by the 
+     * constructor.
+     * @return An array of Strings with the new updates found (new updates are
+     * Strings retrieved from the tracking site and not yet present into the 
+     * Product).
+     * @throws Exception 
+     */
     @Override
     public String[] call() throws Exception {
         
