@@ -50,6 +50,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -64,6 +65,7 @@ import org.jsoup.select.Elements;
 import postetracker.tools.DBManager;
 import postetracker.tools.MultiLineCellRenderer;
 import postetracker.tools.MyTableModel;
+import postetracker.tools.TableDetailsModel;
 
 /**
  * Main class of Poste Tracker.
@@ -162,6 +164,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         timerSpinner.setModel(spinnerModel);
         jToolBar1.add(timerSpinner); 
         
+        // products list table configuration
         MyTableModel model = new MyTableModel();
         model.setData(productList.toArray(new Product[0]));
         jTableLista.setModel(model);
@@ -173,29 +176,43 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         jTableLista.getColumnModel().getColumn(0).setMaxWidth(130);
         jTableLista.getColumnModel().getColumn(0).setPreferredWidth(130);
         
+        // statuses list table configuration
+        TableDetailsModel model2 = new TableDetailsModel();
+        model.setData(null);
+        jTableDetails.setModel(model2);
+        
+        jTableDetails.getColumnModel().getColumn(0).setMaxWidth(30);
+        jTableDetails.getColumnModel().getColumn(0).setPreferredWidth(30);
+        jTableDetails.getColumnModel().getColumn(1).setMaxWidth(80);
+        jTableDetails.getColumnModel().getColumn(1).setPreferredWidth(80);
+        
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        jTableDetails.getColumnModel().getColumn(0).setCellRenderer(rightRenderer);        
+        jTableDetails.getColumnModel().getColumn(1).setCellRenderer(rightRenderer);        
+        
+        // product list table onclick action
         jTableLista.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent event) {
                 if (!event.getValueIsAdjusting()){
+                    
+                    // if no row selected, clear details table and return
                     if (jTableLista.getSelectedRow() == -1) {
-                        jTextAreaDescription.setText("");
+                        TableDetailsModel mod = (TableDetailsModel)jTableDetails.getModel();
+                        mod.setData(null);
+                        mod.fireTableDataChanged();
                         return;
                     }
                     
+                    // retrieve product from list table model
                     MyTableModel model = (MyTableModel)jTableLista.getModel();
                     Product prod = model.getProductByRow(jTableLista.getSelectedRow());
-                    String textarea = "";
-                    Date firstDate = null;
-                    for (ProductStatus status : prod.getStatuses()){
-                        if (firstDate == null) firstDate = status.getDate();
-                        textarea += ("Day " + String.format("%03d", status.daysPassedFrom(firstDate)) + ": " + status.getDateString() + " -> " + status.getStatus() + "\n");
-                    }
                     
-                    Date now = new Date();
-                    int passedAsOfToday = (int)((now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
-                    
-                    textarea += String.format("%03d", passedAsOfToday) + " days passed as of today...";
-                    jTextAreaDescription.setText(textarea.trim());
+                    // send product data to details table
+                    TableDetailsModel mod = (TableDetailsModel)jTableDetails.getModel();
+                    mod.setData(prod);
+                    mod.fireTableDataChanged();
                 }
             }
         });
@@ -204,7 +221,6 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         refreshClock = new Timer();
         int mins = (int)timerSpinner.getValue();
         refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
-        //refreshClock.schedule(new TimerThread(this), 5000, 5000);
         
     }
     
@@ -315,7 +331,11 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
 
         // clear table selection
         jTableLista.clearSelection();
-        jTextAreaDescription.setText("");
+        
+        // clear details table
+        TableDetailsModel mod = (TableDetailsModel)jTableDetails.getModel();
+        mod.setData(null);
+        mod.fireTableDataChanged();
         
     }
     
@@ -490,8 +510,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTableLista = new javax.swing.JTable();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextAreaDescription = new javax.swing.JTextArea();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTableDetails = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Poste Tracker <mario.piccinelli@gmail.com>");
@@ -503,7 +523,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         jLabelStatusBar.setText(" ");
         jLabelStatusBar.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
 
-        jSplitPane1.setDividerLocation(200);
+        jSplitPane1.setDividerLocation(300);
         jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         jSplitPane1.setResizeWeight(1.0);
 
@@ -522,13 +542,20 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
 
         jSplitPane1.setLeftComponent(jScrollPane2);
 
-        jTextAreaDescription.setEditable(false);
-        jTextAreaDescription.setColumns(20);
-        jTextAreaDescription.setFont(new java.awt.Font("Century", 0, 11)); // NOI18N
-        jTextAreaDescription.setRows(4);
-        jScrollPane1.setViewportView(jTextAreaDescription);
+        jTableDetails.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane3.setViewportView(jTableDetails);
 
-        jSplitPane1.setRightComponent(jScrollPane1);
+        jSplitPane1.setRightComponent(jScrollPane3);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -537,9 +564,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabelStatusBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 653, Short.MAX_VALUE))
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 653, Short.MAX_VALUE)
+                    .addComponent(jLabelStatusBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -548,7 +575,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
                 .addContainerGap()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelStatusBar)
                 .addContainerGap())
@@ -598,11 +625,11 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabelStatusBar;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JTable jTableDetails;
     private javax.swing.JTable jTableLista;
-    private javax.swing.JTextArea jTextAreaDescription;
     private javax.swing.JToolBar jToolBar1;
     // End of variables declaration//GEN-END:variables
 

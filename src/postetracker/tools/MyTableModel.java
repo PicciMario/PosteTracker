@@ -31,6 +31,7 @@ public class MyTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
+        if (data == null) return 0;
         return data.length;
     }
 
