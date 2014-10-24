@@ -43,7 +43,8 @@ public class MyTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         if (col == 0){
-            return data[row].getCode() + "\n" + data[row].getFirstDateString();
+            String firstDate = data[row].getFirstDateString();
+            return data[row].getCode() + "\n" + (firstDate == null ? "---" : firstDate);
         }
         else if (col == 1){
             return data[row].getDesc() + "\n" + data[row].getStatus();
