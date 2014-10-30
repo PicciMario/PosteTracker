@@ -36,6 +36,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -311,7 +312,12 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         }
         
         // update product by retrieving data from site
-        updateProduct(product);
+        try{
+            updateProduct(product);
+        } 
+        catch (IOException e){
+            JOptionPane.showMessageDialog(null, "Si è verificato un errore di connettività durante il recupero dello status del nuovo prodotto.");
+        }
         
         // add product to local product list
         productList.add(product);
@@ -439,13 +445,16 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         
         for (Future<String[]> future : list){
             try{
-            String[] prodUpdates = future.get();
+                String[] prodUpdates = future.get();
                 for (String productUpdate : prodUpdates){
                     updates.add(productUpdate);
                 }
             }
             catch (InterruptedException | ExecutionException e){
-                System.out.println(e.toString());
+                posteNewsWindow.addNews("Impossibile acquisire status prodotti da rete.");           
+                posteNewsWindow.setVisible(true);
+                posteNewsWindow.flash();
+                return updates.toArray(new String[0]);
             }
         }
         
@@ -480,8 +489,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
      * page.
      * @param product The Product instance to update
      * @return An array of Strings with the new status updates.
+     * @throws java.io.IOException
      */
-    public static String[] updateProduct(Product product){
+    public static String[] updateProduct(Product product) throws IOException {
         
         List<String> updates = new ArrayList<>();
         
@@ -496,6 +506,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             conn.setRequestMethod("GET");
             conn.setDoOutput(true);
             conn.setDoInput(true);
+            conn.setReadTimeout(5000);
+            conn.setConnectTimeout(5000);            
             
             try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
                 String line;
@@ -505,6 +517,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             }
             
         } catch (Exception e){
+            if (e.getClass() == IOException.class){
+                throw e;
+            }
             System.out.println("Errore durante lettura status: " + e.toString());
             return updates.toArray(new String[0]);
         }        
@@ -865,7 +880,7 @@ class RetrieveProductData implements Callable<String[]>{
      * @throws Exception 
      */
     @Override
-    public String[] call() throws Exception {
+    public String[] call() throws IOException {
         
         String urlDettagli = "http://www.poste.it/online/dovequando/ricerca.do?action=dettaglioCorrispondenza&mpdate=0&mpcode=" + product.getCode();
         
@@ -875,6 +890,8 @@ class RetrieveProductData implements Callable<String[]>{
         try{
             URL siteUrl = new URL(urlDettagli);
             HttpURLConnection conn = (HttpURLConnection) siteUrl.openConnection();
+            conn.setReadTimeout(5000);
+            conn.setConnectTimeout(5000);
             conn.setRequestMethod("GET");
             conn.setDoOutput(true);
             conn.setDoInput(true);
@@ -885,7 +902,8 @@ class RetrieveProductData implements Callable<String[]>{
                     document += (line + "\n");
                 }
             }
-            
+        } catch (IOException e){
+            throw e;
         } catch (Exception e){
             System.out.println("Errore durante lettura status: " + e.toString());
             return updates.toArray(new String[0]);
