@@ -10,6 +10,18 @@
 <project name="PosteTracker" default="default" basedir=".">
     <description>Builds, tests, and runs the project PosteTracker.</description>
     <import file="nbproject/build-impl.xml"/>
+	
+	<target name="-post-jar">
+		<echo>Copying README into dist directory.</echo>
+		
+		<delete>
+			<fileset file="${dist.dir}/README.TXT"/>
+		</delete>
+		
+		<copy file="README.md" todir="${dist.dir}"/>     
+		
+	</target>	
+	
     <!--
 
     There exist several targets which are by default empty and which can be 
