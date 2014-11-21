@@ -1,5 +1,8 @@
 Poste Tracker
 =============
+
+(c) Mario Piccinelli <mario.piccinelli@gmail.com> 2014
+
 Poste Tracker è un semplice programma in Java che permette di monitorare le 
 spedizioni sotto forma di raccomandata internazionale (come i pacchetti di AliExpress,
 per esempio) estraendo in maniera automatica le informazioni dal servizio DoveQuando

@@ -18,7 +18,7 @@
 			<fileset file="${dist.dir}/README.TXT"/>
 		</delete>
 		
-		<copy file="README.md" todir="${dist.dir}"/>     
+		<copy file="README.md" tofile="${dist.dir}/LEGGIMI.TXT"/>     
 		
 	</target>	
 	
