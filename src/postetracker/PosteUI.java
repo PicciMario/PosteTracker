@@ -76,6 +76,7 @@ import org.jsoup.select.Elements;
 import postetracker.tools.DBManager;
 import postetracker.tools.MultiLineCellRenderer;
 import postetracker.tools.MyTableModel;
+import postetracker.tools.StatusRowRenderer;
 import postetracker.tools.TableDetailsModel;
 
 /**
@@ -88,14 +89,18 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     static String url = "http://www.poste.it/online/dovequando/ricerca.do";
     static DBManager dbManager;
     
-    /** Semaphone for the update process */
+    /** Semaphore for the update process */
     public boolean updating = false;
     
     PosteNewsWindow posteNewsWindow = new PosteNewsWindow(this, false);
     
+    // elementi prima toolbar
     JButton newButton, deleteButton, refreshButton, archiveButton;
     JCheckBox showArchivedCheck, timerEnabledCheck;
     JSpinner timerSpinner;
+    
+    // elementi seconda toolbar
+    JButton newStatusButton, deleteStatusButton;
     
     Timer refreshClock;
     
@@ -107,6 +112,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         dbManager = new DBManager();
         
         initComponents();
+        
+        // check db structure
+        dbManager.checkDB();
         
         // loads product list from SQLite database
         productList = dbManager.retrieveProductList();
@@ -188,6 +196,25 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         timerSpinner.setModel(spinnerModel);
         jToolBar1.add(timerSpinner); 
         
+        // SECONDA TOOLBAR
+        
+        // NEW button
+        newStatusButton = new JButton();
+        newStatusButton.setIcon(newIcon);
+        newStatusButton.setText("Nuovo status");
+        newStatusButton.setToolTipText("Aggiungi uno status personalizzato...");
+        newStatusButton.addActionListener(this);
+        jToolBar2.add(newStatusButton);        
+        
+        // DELETE button
+        deleteStatusButton = new JButton();
+        deleteStatusButton.setIcon(delIcon);
+        deleteStatusButton.setText("Cancella status");
+        deleteStatusButton.setToolTipText("Elimina lo status evidenziato...");
+        deleteStatusButton.addActionListener(this);
+        jToolBar2.add(deleteStatusButton);        
+        
+        
         // products list table configuration
         MyTableModel model = new MyTableModel();
         model.setData(productList.toArray(new Product[0]));
@@ -204,6 +231,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         TableDetailsModel model2 = new TableDetailsModel();
         model.setData(null);
         jTableDetails.setModel(model2);
+        jTableDetails.setDefaultRenderer(String.class, new StatusRowRenderer());
         
         jTableDetails.getColumnModel().getColumn(0).setMaxWidth(30);
         jTableDetails.getColumnModel().getColumn(0).setPreferredWidth(30);
@@ -409,6 +437,35 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     }
     
     /**
+     * Deletes a status from a product, both from object and from db
+     * @param prod The product.
+     * @param stat The status to delete.
+     */
+    public void deleteStatus(Product prod, ProductStatus stat){
+        
+        if (stat.isManual() == false){
+            JOptionPane.showMessageDialog(null, "E' possibile cancellare solo gli status inseriti manualmente.");
+            return;
+        }
+
+        String message = "Vuoi cancellare lo status \"" + stat.getStatus() + "\" dal prodotto: \"" + prod.getDesc() + "\"?";
+        
+        int reply = JOptionPane.showConfirmDialog(null, message, "Conferma cancellazione", JOptionPane.YES_NO_OPTION);
+        
+        if (reply == JOptionPane.YES_OPTION) {
+        
+            boolean removed = prod.deleteStatus(stat);
+            if (removed) {
+                dbManager.deleteStatus(prod, stat);
+            }
+
+            updateUI();
+        
+        }
+        
+    }
+    
+    /**
      * Toggles the "archive" flag of a product, both in the in-app list
      * and in the database. Then calls
      * {@link updateTableContent() updateTableContent()}.
@@ -543,17 +600,26 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         
         if (!masthead.isEmpty()){
             for (int i = 1; i < masthead.size(); i++){
-                String newStatus = masthead.get(i).select("li").text();
+                String newStatusString = masthead.get(i).select("li").text();
+                ProductStatus newStatus = new ProductStatus(newStatusString, null);
                 boolean wasNew = product.addStatus(newStatus);
                 if (wasNew) {
                     dbManager.storeNewStatus(product.getCode(), newStatus);
-                    updates.add(product.getDesc() + ": " + newStatus);
+                    updates.add(product.getDesc() + ": " + newStatusString);
                 }
             }
         }
         
         return updates.toArray(new String[0]);
         
+    }
+    
+    public void addProductStatus(Product product, ProductStatus status){
+        boolean wasNew = product.addStatus(status);
+        if (wasNew) {
+            dbManager.storeNewStatus(product.getCode(), status);
+            updateUI();
+        }    
     }
 
     /**
@@ -572,6 +638,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         jTableLista = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTableDetails = new javax.swing.JTable();
+        jToolBar2 = new javax.swing.JToolBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Poste Tracker <mario.piccinelli@gmail.com>");
@@ -617,6 +684,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
 
         jSplitPane1.setRightComponent(jScrollPane3);
 
+        jToolBar2.setFloatable(false);
+        jToolBar2.setRollover(true);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -625,8 +695,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 653, Short.MAX_VALUE)
-                    .addComponent(jLabelStatusBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabelStatusBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 653, Short.MAX_VALUE)
+                    .addComponent(jSplitPane1)
+                    .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -635,7 +706,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
                 .addContainerGap()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelStatusBar)
                 .addContainerGap())
@@ -691,6 +764,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     private javax.swing.JTable jTableDetails;
     private javax.swing.JTable jTableLista;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JToolBar jToolBar2;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -749,6 +823,39 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             else{
                 refreshClock.cancel();
             }
+        }
+        
+        else if (e.getSource() == newStatusButton) {
+            // get selected product
+            if (jTableLista.getSelectedRow() == -1) {
+                return;
+            }
+            
+            MyTableModel model = (MyTableModel)jTableLista.getModel();
+            Product prod = model.getProductByRow(jTableLista.getSelectedRow());
+            
+            NewStatus dialog = new NewStatus(this, true, prod);
+            dialog.setVisible(true);
+            
+        }
+        
+        else if (e.getSource() == deleteStatusButton){
+            // get selected product
+            if (jTableLista.getSelectedRow() == -1) {
+                return;
+            }
+            if (jTableDetails.getSelectedRow() == -1) {
+                return;
+            }            
+            
+            MyTableModel model = (MyTableModel)jTableLista.getModel();
+            Product prod = model.getProductByRow(jTableLista.getSelectedRow());
+            
+            TableDetailsModel model2 = (TableDetailsModel)jTableDetails.getModel();
+            ProductStatus stat = model2.getStatusByRow(jTableDetails.getSelectedRow());
+            
+            deleteStatus(prod, stat);
+            
         }
         
     }
@@ -928,11 +1035,12 @@ class RetrieveProductData implements Callable<String[]>{
         
         if (!masthead.isEmpty()){
             for (int i = 1; i < masthead.size(); i++){
-                String newStatus = masthead.get(i).select("li").text();
+                String newStatusString = masthead.get(i).select("li").text();
+                ProductStatus newStatus = new ProductStatus(newStatusString, null);
                 boolean wasNew = product.addStatus(newStatus);
                 if (wasNew) {
                     dbManager.storeNewStatus(product.getCode(), newStatus);
-                    updates.add(product.getDesc() + ": " + newStatus);
+                    updates.add(product.getDesc() + ": " + newStatusString);
                 }
             }
         }

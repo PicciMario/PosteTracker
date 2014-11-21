@@ -127,20 +127,17 @@ public class Product {
             archive = 0;
     }
     
-    
     /**
-     * Adds a status to the product statuses. It parses the passed String to
-     * retrieve the date (if present).
+     * Adds a status to the product statuses.
      * Before adding the new status it checks for its existence in the statuses
      * list and, if already present, does nothing.
-     * @param newStatus The new status String
+     * @param newStat The new status
      * @return True if the status was new, false otherwise.
      */
-    public boolean addStatus(String newStatus){
+    public boolean addStatus(ProductStatus newStat){
         
         boolean already = false;
         
-        ProductStatus newStat = new ProductStatus(newStatus);
         for (ProductStatus stat : statusList){
             boolean thisAlready = stat.equals(newStat);
             if (thisAlready) {
@@ -150,12 +147,12 @@ public class Product {
         }
         
         if (!already){
-            statusList.add(new ProductStatus(newStatus));
+            statusList.add(newStat);
             Collections.sort(statusList, new ProductStatusCompareByDate());
         }
         
         return !already;
-    }    
+    }        
     
     /**
      * Retrieves the most recent status ("unknown" if no status available).
@@ -168,6 +165,16 @@ public class Product {
         else {
             return "unknown";
         }
+    }
+    
+    /**
+     * Deletes a status.
+     * @param status The status to delete.
+     * @return True if status was found into product and thus removed.
+     */
+    public boolean deleteStatus(ProductStatus status){
+        boolean removed = statusList.remove(status);
+        return removed;
     }
     
     /** 
@@ -255,6 +262,7 @@ class ProductCompareByDate implements Comparator<Product> {
         if (o1.getFirstDate() != null && o2.getFirstDate() == null) return -1;
 
         // nessuno dei due ha data valida
+        // oppure hanno la stessa data
         return o1.getDesc().compareTo(o2.getDesc());
 
     }

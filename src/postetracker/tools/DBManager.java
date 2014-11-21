@@ -31,8 +31,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import postetracker.Product;
+import postetracker.ProductStatus;
 
 /**
  * SQLite3 DB manager for Poste Tracker.
@@ -71,7 +73,9 @@ public class DBManager {
                 stmt.executeUpdate(sql);
                 sql = "CREATE TABLE statuses ("
                         + " code TEXT NOT NULL,"
-                        + " status TEXT NOT NULL"
+                        + " status TEXT NOT NULL,"
+                        + " date INTEGER,"
+                        + " manual INTEGER"
                         + ");";
                 stmt.executeUpdate(sql);                
             }
@@ -80,7 +84,54 @@ public class DBManager {
         }
     }
     
-    public final List<Product> retrieveProductList(){
+    public final void checkDB(){
+        
+        // chech db version and if needed update
+        
+        // 21/11/14: added column "date" (integer) to table "statuses" ----------------------------
+        
+        try{
+            try (Statement stmt = conn.createStatement()) {
+                ResultSet rs = stmt.executeQuery("SELECT date FROM statuses LIMIT 1;");
+            }
+        } 
+        catch (SQLException e){
+            try{
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("ALTER TABLE statuses ADD COLUMN date INTEGER;");
+                    System.out.println("Aggiunta colonna DATE alla tabella STATUSES.");
+                }
+            }
+            catch (SQLException ex){
+                System.out.println(ex.toString());
+                System.exit(1);
+            }
+        }            
+        
+        // 21/11/14: added column "manual" (integer) to table "statuses" --------------------------
+        
+        try{
+            try (Statement stmt = conn.createStatement()) {
+                ResultSet rs = stmt.executeQuery("SELECT manual FROM statuses LIMIT 1;");
+            }
+        } 
+        catch (SQLException e){
+            try{
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("ALTER TABLE statuses ADD COLUMN manual INTEGER;");
+                    System.out.println("Aggiunta colonna MANUAL alla tabella STATUSES.");
+                }
+            }
+            catch (SQLException ex){
+                System.out.println(ex.toString());
+                System.exit(1);
+            }
+        }     
+        
+        
+    }
+    
+    public final List<Product> retrieveProductList(){    
         
         List<Product> productList = new ArrayList<>();
         
@@ -105,8 +156,27 @@ public class DBManager {
                 PreparedStatement stmt = conn.prepareStatement("SELECT * FROM statuses WHERE code=?");
                 stmt.setString(1, prod.getCode());
                 ResultSet rs = stmt.executeQuery();
+                
                 while(rs.next()){
-                    prod.addStatus(rs.getString("status"));
+                    
+                    String status = rs.getString("status");
+                    long date = rs.getLong("date");
+                    
+                    ProductStatus stat;
+                            
+                    if (date != 0){
+                        stat = new ProductStatus(status, new Date(date));
+                    }
+                    else{
+                        stat = new ProductStatus(status, null);
+                    }
+                    
+                    int manual = rs.getInt("manual");
+                    if (manual != 0){
+                        stat.setManual(true);
+                    }
+                    
+                    prod.addStatus(stat);
                 }
                 
             }
@@ -118,17 +188,19 @@ public class DBManager {
         return productList;
     }
     
-    public void storeNewStatus(String code, String status){
+    public void storeNewStatus(String code, ProductStatus status){
         try{
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO statuses(code, status) VALUES (?,?);");
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO statuses(code, status, date, manual) VALUES (?,?,?,?);");
             stmt.setString(1, code);
-            stmt.setString(2, status);
+            stmt.setString(2, status.getStatus());
+            stmt.setLong(3, status.getDate().getTime());
+            stmt.setInt(4, status.isManual() ? 1 : 0);
             stmt.execute();
         }
         catch (SQLException e){
             System.out.println(e.toString());
         }        
-    }
+    }    
     
     public int storeNewProduct(Product product){
         
@@ -178,6 +250,22 @@ public class DBManager {
         catch (SQLException e){
             System.out.println(e.toString());
         }         
+    }
+    
+    public void deleteStatus(Product prod, ProductStatus stat){
+        try{
+            
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM statuses WHERE code=? AND status=?;");
+            stmt.setString(1, prod.getCode());
+            stmt.setString(2, stat.getStatus());
+            stmt.execute();            
+            
+            conn.commit();
+            stmt.close();
+        }
+        catch (SQLException e){
+            System.out.println(e.toString());
+        }          
     }
     
     public void archiveProduct(Product product){

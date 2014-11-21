@@ -35,13 +35,14 @@ public class NewProduct extends javax.swing.JDialog {
     
     /**
      * Creates new form NewProduct
+     * @param parent
+     * @param modal
      */
     public NewProduct(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         
         posteParent = (PosteUI)parent;
-        
     }
 
     /**

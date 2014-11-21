@@ -40,6 +40,7 @@ public class ProductStatus{
     
     private Date date;
     private String status;
+    private boolean manual = false;
     
     private final SimpleDateFormat dateFormatParse = new SimpleDateFormat("dd-MMM-yyyy");
     private final SimpleDateFormat dateFormatPrint = new SimpleDateFormat("dd/MM/yyyy");
@@ -48,27 +49,36 @@ public class ProductStatus{
         
     }
     
-    public ProductStatus(String newStatus) {
+    public ProductStatus(String newStatus, Date newDate) {
 
         status = newStatus;
         
-        Pattern p = Pattern.compile("[0-9]+-[A-Z]+-[0-9]+");
-        Matcher m = p.matcher(newStatus);
+        // if date not passed by constructor, tries to parse it from status text
+        if (newDate == null){
+            Pattern p = Pattern.compile("[0-9]+-[A-Z]+-[0-9]+");
+            Matcher m = p.matcher(newStatus);
 
-        if (m.find()) {
+            if (m.find()) {
 
-            String dateString = m.group();
+                String dateString = m.group();
 
-            try {
-                date = dateFormatParse.parse(dateString);
-            } catch (ParseException ex) {
+                try {
+                    date = dateFormatParse.parse(dateString);
+                } catch (ParseException ex) {
+                    date = null;
+                }
+
+            }
+            else{
                 date = null;
             }
-
         }
-        else{
-            date = null;
+        
+        // otherwise jsut use the passed date
+        else {
+            date = newDate;
         }
+        
     }
     
     public static ProductStatus today(){
@@ -124,6 +134,14 @@ public class ProductStatus{
         
         return (int)((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
         
+    }
+    
+    public void setManual(boolean newManual){
+        manual = newManual;
+    }
+    
+    public boolean isManual(){
+        return manual;
     }
 
     

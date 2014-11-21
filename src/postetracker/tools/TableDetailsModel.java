@@ -38,6 +38,10 @@ public class TableDetailsModel extends AbstractTableModel {
     private final String[] columnNames = new String[]{"GG", "Data", "Status"};
     private ProductStatus[] data = null;
     Date firstDate = null;
+    
+    public ProductStatus getStatusByRow(int row){
+        return data[row];
+    }
 
     public void setData(Product prod){
         if (prod == null) {
