@@ -242,9 +242,21 @@ public class Product {
 class ProductCompareByDate implements Comparator<Product> {
     @Override
     public int compare(Product o1, Product o2) {
-        if (o1.getFirstDate() == null) return -1;
-        if (o2.getFirstDate() == null) return 1;
-        return o1.getFirstDate().compareTo(o2.getFirstDate());
+        
+        // entrambi hanno date valide
+        if (o1.getFirstDate() != null && o2.getFirstDate() != null){
+            int confrontoDate = o1.getFirstDate().compareTo(o2.getFirstDate());
+            if (confrontoDate != 0) 
+                return confrontoDate;            
+        }
+        
+        // uno solo dei due ha data valida
+        if (o1.getFirstDate() == null && o2.getFirstDate() != null) return 1;
+        if (o1.getFirstDate() != null && o2.getFirstDate() == null) return -1;
+
+        // nessuno dei due ha data valida
+        return o1.getDesc().compareTo(o2.getDesc());
+
     }
 }
 

@@ -111,6 +111,15 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         // loads product list from SQLite database
         productList = dbManager.retrieveProductList();
         
+        // sort the whole product list by date of the first (chronological) 
+        // update in each of the products.
+        try{
+            Collections.sort(productList, new ProductCompareByDate());
+        }
+        catch (Exception e){
+            System.out.println(e.toString());
+        }          
+        
         // Get current classloader
         ClassLoader cl = this.getClass().getClassLoader();
         // Create icons
