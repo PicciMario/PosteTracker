@@ -14,7 +14,16 @@ https://www.java.com/it/download/manual.jsp
 
 Installazione
 -------------
-Per installare il programma è sufficiente estrarre il contenuto del file ZIP in una cartella qualsiasi.
+Per installare il programma è sufficiente scaricare l'ultima versione disponibile dal sito 
+http://piccimario.github.io/PosteTracker/ ed estrarre il contenuto del file ZIP in una cartella qualsiasi.
+
+Aggiornamento
+-------------
+Se hai usato il programma (e hai archiviato delle spedizioni che desideri conservare) puoi procedere ad
+aggiornare il programma semplicemente andando a sovrascrivere i file preesistenti con quelli estratti dal 
+nuovo ZIP. Come unica raccomandazione, devi conservare il file postetracker.db, che contiene le informazioni
+relative alle tue spedizioni. Conviene sempre conservarne una copia. In ogni caso, se il file viene cancellato
+il programma al successivo avvio lo ricreerà da zero.
 
 Avvio
 -----
