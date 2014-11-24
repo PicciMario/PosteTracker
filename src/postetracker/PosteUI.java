@@ -95,7 +95,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     PosteNewsWindow posteNewsWindow = new PosteNewsWindow(this, false);
     
     // elementi prima toolbar
-    JButton newButton, deleteButton, refreshButton, archiveButton;
+    JButton newButton, deleteButton, refreshButton, archiveButton, aboutButton;
     JCheckBox showArchivedCheck, timerEnabledCheck;
     JSpinner timerSpinner;
     
@@ -135,6 +135,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         Icon delIcon = new ImageIcon(cl.getResource("resources/delete.gif"));
         Icon refreshIcon = new ImageIcon(cl.getResource("resources/refresh.gif"));
         Icon archiveIcon = new ImageIcon(cl.getResource("resources/archive.gif"));
+        Icon aboutIcon = new ImageIcon(cl.getResource("resources/about.gif"));
         
         URL logoUrl = cl.getResource("resources/logo.png");
         Toolkit kit = Toolkit.getDefaultToolkit();
@@ -195,6 +196,17 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         SpinnerModel spinnerModel = new SpinnerNumberModel(30, 1, 1000, 1);
         timerSpinner.setModel(spinnerModel);
         jToolBar1.add(timerSpinner); 
+        
+        // separatore
+        jToolBar1.addSeparator();        
+        
+        // ABOUT button
+        aboutButton = new JButton();
+        aboutButton.setIcon(aboutIcon);
+        aboutButton.setText("Info");
+        aboutButton.setToolTipText("Informazioni");
+        aboutButton.addActionListener(this);
+        jToolBar1.add(aboutButton);         
         
         // SECONDA TOOLBAR
         
@@ -823,6 +835,11 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             else{
                 refreshClock.cancel();
             }
+        }
+        
+        else if (e.getSource() == aboutButton) {
+            PosteAbout dialog = new PosteAbout(this, true);
+            dialog.setVisible(true);
         }
         
         else if (e.getSource() == newStatusButton) {
