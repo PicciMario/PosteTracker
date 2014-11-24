@@ -26,6 +26,15 @@
 	
   </head>
   <body>
+  
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+	  var js, fjs = d.getElementsByTagName(s)[0];
+	  if (d.getElementById(id)) return;
+	  js = d.createElement(s); js.id = id;
+	  js.src = "//connect.facebook.net/it_IT/sdk.js#xfbml=1&appId=282392338514555&version=v2.0";
+	  fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));</script>
 
       <header>
         <h1>Poste Tracker</h1>
@@ -99,6 +108,7 @@ Se hai qualche problema, se vuoi suggerire una feature o vuoi segnalare un error
 
       </section>
       <footer>
+		<p><div class="fb-like" data-href="https://www.facebook.com/postetracker" data-layout="box_count" data-action="like" data-show-faces="false" data-share="true"></div></p>
         <p>Project maintained by <a href="https://github.com/PicciMario">PicciMario</a></p>
         <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
       </footer>
