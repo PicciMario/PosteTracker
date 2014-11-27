@@ -24,6 +24,7 @@
 package postetracker;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -39,6 +40,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +53,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -83,7 +86,7 @@ import postetracker.tools.TableDetailsModel;
  * Main class of Poste Tracker.
  * @author m.piccinelli
  */
-public class PosteUI extends javax.swing.JFrame implements ActionListener, ChangeListener {
+public class PosteUI extends javax.swing.JFrame implements ActionListener {
     
     static List<Product> productList;
     static String url = "http://www.poste.it/online/dovequando/ricerca.do";
@@ -94,13 +97,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     
     PosteNewsWindow posteNewsWindow = new PosteNewsWindow(this, false);
     
-    // elementi prima toolbar
-    JButton newButton, deleteButton, refreshButton, archiveButton, aboutButton;
-    JCheckBox showArchivedCheck, timerEnabledCheck;
-    JSpinner timerSpinner;
-    
     // elementi seconda toolbar
-    JButton newStatusButton, deleteStatusButton;
+    JButton newStatusButton, deleteStatusButton, webButton;
     
     Timer refreshClock;
     
@@ -142,72 +140,6 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         Image logoImg = kit.createImage(logoUrl);
         setIconImage(logoImg);
         
-        // NEW button
-        newButton = new JButton();
-        newButton.setIcon(newIcon);
-        newButton.setText("Nuovo");
-        newButton.setToolTipText("Nuovo codice...");
-        newButton.addActionListener(this);
-        jToolBar1.add(newButton);
-        
-        // DELETE button
-        deleteButton = new JButton();
-        deleteButton.setIcon(delIcon);
-        deleteButton.setText("Cancella");
-        deleteButton.setToolTipText("Cancella codice...");
-        deleteButton.addActionListener(this);
-        jToolBar1.add(deleteButton);
-        
-        // ARCHIVE button
-        archiveButton = new JButton();
-        archiveButton.setIcon(archiveIcon);
-        archiveButton.setText("Archivia");
-        archiveButton.setToolTipText("Archivia...");
-        archiveButton.addActionListener(this);
-        jToolBar1.add(archiveButton);        
-        
-        // separatore
-        jToolBar1.addSeparator();
-        
-        // REFRESH button
-        refreshButton = new JButton();
-        refreshButton.setIcon(refreshIcon);
-        refreshButton.setText("Aggiorna");
-        refreshButton.setToolTipText("Aggiorna");
-        refreshButton.addActionListener(this);
-        jToolBar1.add(refreshButton);     
-        
-        // separatore
-        jToolBar1.addSeparator();
-        
-        showArchivedCheck = new JCheckBox("Mostra archiviati");
-        showArchivedCheck.addActionListener(this);
-        jToolBar1.add(showArchivedCheck);
-        
-        // separatore
-        jToolBar1.addSeparator();
-        
-        // timer
-        timerEnabledCheck = new JCheckBox("Auto refresh minuti: ");
-        timerEnabledCheck.addActionListener(this);
-        jToolBar1.add(timerEnabledCheck);   
-        timerSpinner = new JSpinner();
-        timerSpinner.addChangeListener(this);
-        SpinnerModel spinnerModel = new SpinnerNumberModel(30, 1, 1000, 1);
-        timerSpinner.setModel(spinnerModel);
-        jToolBar1.add(timerSpinner); 
-        
-        // separatore
-        jToolBar1.addSeparator();        
-        
-        // ABOUT button
-        aboutButton = new JButton();
-        aboutButton.setIcon(aboutIcon);
-        aboutButton.setText("Info");
-        aboutButton.setToolTipText("Informazioni");
-        aboutButton.addActionListener(this);
-        jToolBar1.add(aboutButton);         
-        
         // SECONDA TOOLBAR
         
         // NEW button
@@ -224,8 +156,23 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         deleteStatusButton.setText("Cancella status");
         deleteStatusButton.setToolTipText("Elimina lo status evidenziato...");
         deleteStatusButton.addActionListener(this);
-        jToolBar2.add(deleteStatusButton);        
+        jToolBar2.add(deleteStatusButton);     
         
+        // WEB button
+        webButton = new JButton();
+        webButton.setIcon(aboutIcon);
+        webButton.setText("Vedi su Poste.it");
+        webButton.setToolTipText("Vedi su Poste.it...");
+        webButton.addActionListener(this);
+        jToolBar2.add(webButton);          
+        
+        
+        // button group for refresh menu
+        ButtonGroup refreshGroup = new ButtonGroup();
+        refreshGroup.add(jRefreshNone);
+        refreshGroup.add(jRefresh10);
+        refreshGroup.add(jRefresh30);
+        refreshGroup.add(jRefresh60);
         
         // products list table configuration
         MyTableModel model = new MyTableModel();
@@ -281,11 +228,11 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             }
         });
         
-        timerEnabledCheck.setSelected(true);
+        // default setting for refresh timer (30 min)
         refreshClock = new Timer();
-        int mins = (int)timerSpinner.getValue();
+        int mins = 30;
         refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
-        
+       
     }
     
     /**
@@ -396,7 +343,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         List<Product> filteredProductList = new ArrayList<>();
         for (Product prod : productList){
             if (prod.isArchived() == true){
-                if (showArchivedCheck.isSelected() == true){
+                if (jCheckMenuMostraArchiviati.isSelected() == false){
                     filteredProductList.add(prod);
                 }
             }
@@ -643,7 +590,6 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jToolBar1 = new javax.swing.JToolBar();
         jLabelStatusBar = new javax.swing.JLabel();
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -651,12 +597,26 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         jScrollPane3 = new javax.swing.JScrollPane();
         jTableDetails = new javax.swing.JTable();
         jToolBar2 = new javax.swing.JToolBar();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuNewProd = new javax.swing.JMenuItem();
+        jMenuDelProd = new javax.swing.JMenuItem();
+        jMenuArchivia = new javax.swing.JMenuItem();
+        jCheckMenuMostraArchiviati = new javax.swing.JCheckBoxMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        jMenuQuit = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        jMenuAggiorna = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        jRefreshNone = new javax.swing.JRadioButtonMenuItem();
+        jRefresh10 = new javax.swing.JRadioButtonMenuItem();
+        jRefresh30 = new javax.swing.JRadioButtonMenuItem();
+        jRefresh60 = new javax.swing.JRadioButtonMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Poste Tracker <mario.piccinelli@gmail.com>");
-
-        jToolBar1.setFloatable(false);
-        jToolBar1.setRollover(true);
 
         jLabelStatusBar.setForeground(java.awt.Color.gray);
         jLabelStatusBar.setText(" ");
@@ -699,6 +659,118 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
         jToolBar2.setFloatable(false);
         jToolBar2.setRollover(true);
 
+        jMenu1.setText("File");
+
+        jMenuNewProd.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuNewProd.setText("Nuovo prodotto...");
+        jMenuNewProd.setToolTipText("");
+        jMenuNewProd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuNewProdActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuNewProd);
+
+        jMenuDelProd.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuDelProd.setText("Cancella prodotto...");
+        jMenuDelProd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuDelProdActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuDelProd);
+
+        jMenuArchivia.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, 0));
+        jMenuArchivia.setText("Archivia/disarchivia");
+        jMenuArchivia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuArchiviaActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuArchivia);
+
+        jCheckMenuMostraArchiviati.setSelected(true);
+        jCheckMenuMostraArchiviati.setText("Nascondi archiviati");
+        jCheckMenuMostraArchiviati.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckMenuMostraArchiviatiActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jCheckMenuMostraArchiviati);
+        jMenu1.add(jSeparator1);
+
+        jMenuQuit.setText("Esci");
+        jMenuQuit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuQuitActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuQuit);
+
+        jMenuBar1.add(jMenu1);
+
+        jMenu3.setText("Aggiornamento");
+
+        jMenuAggiorna.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
+        jMenuAggiorna.setText("Aggiorna adesso");
+        jMenuAggiorna.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuAggiornaActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuAggiorna);
+        jMenu3.add(jSeparator2);
+
+        jRefreshNone.setText("Solo manuale");
+        jRefreshNone.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRefreshNoneActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jRefreshNone);
+
+        jRefresh10.setText("Automatico ogni 10 minuti");
+        jRefresh10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRefresh10ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jRefresh10);
+
+        jRefresh30.setSelected(true);
+        jRefresh30.setText("Automatico ogni 30 minuti");
+        jRefresh30.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRefresh30ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jRefresh30);
+
+        jRefresh60.setText("Automatico ogni 1 ora");
+        jRefresh60.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRefresh60ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jRefresh60);
+
+        jMenuBar1.add(jMenu3);
+
+        jMenu2.setText("?");
+
+        jMenuAbout.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
+        jMenuAbout.setText("About PosteTracker...");
+        jMenuAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuAboutActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuAbout);
+
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -706,7 +778,6 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabelStatusBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 653, Short.MAX_VALUE)
                     .addComponent(jSplitPane1)
                     .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -716,9 +787,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 491, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -728,6 +797,99 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jMenuNewProdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuNewProdActionPerformed
+        NewProduct dialog = new NewProduct(this, true);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_jMenuNewProdActionPerformed
+
+    private void jMenuDelProdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuDelProdActionPerformed
+        // get selected product
+        if (jTableLista.getSelectedRow() == -1) {
+            return;
+        }
+        MyTableModel model = (MyTableModel)jTableLista.getModel();
+        Product prod = model.getProductByRow(jTableLista.getSelectedRow());
+        deleteProduct(prod);
+    }//GEN-LAST:event_jMenuDelProdActionPerformed
+
+    private void jMenuQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuQuitActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jMenuQuitActionPerformed
+
+    private void jMenuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuAboutActionPerformed
+        PosteAbout dialog = new PosteAbout(this, true);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_jMenuAboutActionPerformed
+
+    private void jMenuArchiviaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuArchiviaActionPerformed
+        // get selected product
+        if (jTableLista.getSelectedRow() == -1) {
+            return;
+        }
+        MyTableModel model = (MyTableModel)jTableLista.getModel();
+        Product prod = model.getProductByRow(jTableLista.getSelectedRow());
+        archiveProduct(prod); 
+    }//GEN-LAST:event_jMenuArchiviaActionPerformed
+
+    private void jMenuAggiornaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuAggiornaActionPerformed
+        updateUI();
+        
+        refreshClock.cancel();
+        int mins = 0;
+        if (jRefresh10.isSelected()){
+            mins = 10;
+        }
+        else if (jRefresh30.isSelected()){
+            mins = 30;
+        }
+        else if (jRefresh60.isSelected()){
+            mins = 60;
+        }
+        
+        if (mins > 0){
+            refreshClock = new Timer();
+            refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);     
+            System.out.println("Scheduled timed refresh in " + mins + " minutes...");
+        }
+        
+    }//GEN-LAST:event_jMenuAggiornaActionPerformed
+
+    private void jCheckMenuMostraArchiviatiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckMenuMostraArchiviatiActionPerformed
+        updateTableContent();
+    }//GEN-LAST:event_jCheckMenuMostraArchiviatiActionPerformed
+
+    private void jRefresh10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRefresh10ActionPerformed
+        refreshClock.cancel();
+        int mins = 10;
+        refreshClock.cancel();
+        refreshClock = new Timer();
+        refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
+        System.out.println("Scheduled timed refresh in " + mins + " minutes...");
+    }//GEN-LAST:event_jRefresh10ActionPerformed
+
+    private void jRefreshNoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRefreshNoneActionPerformed
+        refreshClock.cancel();
+        System.out.println("Canceled timed refresh...");
+    }//GEN-LAST:event_jRefreshNoneActionPerformed
+
+    private void jRefresh60ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRefresh60ActionPerformed
+        refreshClock.cancel();
+        int mins = 60;
+        refreshClock.cancel();
+        refreshClock = new Timer();
+        refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
+        System.out.println("Scheduled timed refresh in " + mins + " minutes...");
+    }//GEN-LAST:event_jRefresh60ActionPerformed
+
+    private void jRefresh30ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRefresh30ActionPerformed
+        refreshClock.cancel();
+        int mins = 30;
+        refreshClock.cancel();
+        refreshClock = new Timer();
+        refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
+        System.out.println("Scheduled timed refresh in " + mins + " minutes...");
+    }//GEN-LAST:event_jRefresh30ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -769,80 +931,36 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBoxMenuItem jCheckMenuMostraArchiviati;
     private javax.swing.JLabel jLabelStatusBar;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenuItem jMenuAbout;
+    private javax.swing.JMenuItem jMenuAggiorna;
+    private javax.swing.JMenuItem jMenuArchivia;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuDelProd;
+    private javax.swing.JMenuItem jMenuNewProd;
+    private javax.swing.JMenuItem jMenuQuit;
+    private javax.swing.JRadioButtonMenuItem jRefresh10;
+    private javax.swing.JRadioButtonMenuItem jRefresh30;
+    private javax.swing.JRadioButtonMenuItem jRefresh60;
+    private javax.swing.JRadioButtonMenuItem jRefreshNone;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTable jTableDetails;
     private javax.swing.JTable jTableLista;
-    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JToolBar jToolBar2;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void actionPerformed(ActionEvent e) {
         
-        // New Button
-        if (e.getSource() == newButton) {
-            NewProduct dialog = new NewProduct(this, true);
-            dialog.setVisible(true);
-        }
-        
-        else if (e.getSource() == deleteButton){
-            // get selected product
-            if (jTableLista.getSelectedRow() == -1) {
-                return;
-            }
-            
-            MyTableModel model = (MyTableModel)jTableLista.getModel();
-            Product prod = model.getProductByRow(jTableLista.getSelectedRow());
-            deleteProduct(prod);
-        }
-        
-        else if (e.getSource() == refreshButton){
-            updateUI();
-            if (timerEnabledCheck.isSelected()){
-                int mins = (int)timerSpinner.getValue();
-                refreshClock.cancel();
-                refreshClock = new Timer();
-                refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
-            }            
-        }
-        
-        else if (e.getSource() == showArchivedCheck){
-            updateTableContent();
-        }
-        
-        else if (e.getSource() == archiveButton){
-            // get selected product
-            if (jTableLista.getSelectedRow() == -1) {
-                return;
-            }
-            
-            MyTableModel model = (MyTableModel)jTableLista.getModel();
-            Product prod = model.getProductByRow(jTableLista.getSelectedRow());
-            archiveProduct(prod);            
-        }
-        
-        else if (e.getSource() == timerEnabledCheck) {
-            
-            if (timerEnabledCheck.isSelected()){
-                int mins = (int)timerSpinner.getValue();
-                refreshClock.cancel();
-                refreshClock = new Timer();
-                refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
-            }
-            else{
-                refreshClock.cancel();
-            }
-        }
-        
-        else if (e.getSource() == aboutButton) {
-            PosteAbout dialog = new PosteAbout(this, true);
-            dialog.setVisible(true);
-        }
-        
-        else if (e.getSource() == newStatusButton) {
+        if (e.getSource() == newStatusButton) {
             // get selected product
             if (jTableLista.getSelectedRow() == -1) {
                 return;
@@ -875,20 +993,29 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener, Chang
             
         }
         
+        else if (e.getSource() == webButton){
+            // get selected product
+            if (jTableLista.getSelectedRow() == -1) {
+                return;
+            }
+            
+            MyTableModel model = (MyTableModel)jTableLista.getModel();
+            Product prod = model.getProductByRow(jTableLista.getSelectedRow());            
+            
+            String baseUrl1 = "http://www.poste.it/online/dovequando/ricerca.do?action=dettaglioCorrispondenza&mpcode=";
+            String baseUrl2 = "&mpdate=0";
+            String url = baseUrl1 + prod.getCode() + baseUrl2;
+            
+            try {
+                Desktop.getDesktop().browse(new URL(url).toURI());
+            } catch (URISyntaxException | IOException ex) {
+                JOptionPane.showMessageDialog(null, "Errore durante apertura pagina web: " + ex.toString());
+            }              
+
+        }
+        
     }
 
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        if (timerEnabledCheck.isSelected()){
-            int mins = (int)timerSpinner.getValue();
-            refreshClock.cancel();
-            refreshClock = new Timer();
-            refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
-        }
-        else{
-            refreshClock.cancel();
-        }        
-    }
 }
 
 /**
