@@ -68,7 +68,8 @@ public class DBManager {
                 sql = "CREATE TABLE products ("
                         + " code TEXT PRIMARY KEY NOT NULL,"
                         + " desc TEXT NOT NULL,"
-                        + " archivestatus INTEGER DEFAULT 0"
+                        + " archivestatus INTEGER DEFAULT 0,"
+                        + " url TEXT "
                         + ");";
                 stmt.executeUpdate(sql);
                 sql = "CREATE TABLE statuses ("
