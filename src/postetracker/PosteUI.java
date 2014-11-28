@@ -106,6 +106,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
     
     Timer refreshClock;
     
+    Icon ledIcon, ledIconOff;
+    
     /**
      * Creates new form PosteUI
      */
@@ -139,10 +141,16 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         Icon archiveIcon = new ImageIcon(cl.getResource("resources/archive.gif"));
         Icon aboutIcon = new ImageIcon(cl.getResource("resources/about.gif"));
         
+        // icona programma
         URL logoUrl = cl.getResource("resources/logo.png");
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image logoImg = kit.createImage(logoUrl);
         setIconImage(logoImg);
+        
+        // led lampeggiante
+        ledIcon = new ImageIcon(cl.getResource("resources/led.gif"));
+        ledIconOff = new ImageIcon(cl.getResource("resources/led-off.gif"));
+        jLedLabel.setIcon(ledIcon);
         
         // SECONDA TOOLBAR ------------------------------------------------------------------------
         
@@ -653,6 +661,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         jScrollPane3 = new javax.swing.JScrollPane();
         jTableDetails = new javax.swing.JTable();
         jToolBar2 = new javax.swing.JToolBar();
+        jLedLabel = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuNewProd = new javax.swing.JMenuItem();
@@ -844,9 +853,12 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabelStatusBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 653, Short.MAX_VALUE)
-                    .addComponent(jSplitPane1)
-                    .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabelStatusBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLedLabel))
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 714, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -857,7 +869,9 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelStatusBar)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelStatusBar)
+                    .addComponent(jLedLabel))
                 .addContainerGap())
         );
 
@@ -932,11 +946,13 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         refreshClock = new Timer();
         refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
         System.out.println("Scheduled timed refresh in " + mins + " minutes...");
+        jLedLabel.setIcon(ledIcon);
     }//GEN-LAST:event_jRefresh10ActionPerformed
 
     private void jRefreshNoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRefreshNoneActionPerformed
         refreshClock.cancel();
         System.out.println("Canceled timed refresh...");
+        jLedLabel.setIcon(ledIconOff);
     }//GEN-LAST:event_jRefreshNoneActionPerformed
 
     private void jRefresh60ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRefresh60ActionPerformed
@@ -946,6 +962,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         refreshClock = new Timer();
         refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
         System.out.println("Scheduled timed refresh in " + mins + " minutes...");
+        jLedLabel.setIcon(ledIcon);
     }//GEN-LAST:event_jRefresh60ActionPerformed
 
     private void jRefresh30ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRefresh30ActionPerformed
@@ -955,6 +972,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         refreshClock = new Timer();
         refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
         System.out.println("Scheduled timed refresh in " + mins + " minutes...");
+        jLedLabel.setIcon(ledIcon);
     }//GEN-LAST:event_jRefresh30ActionPerformed
 
     private void jMenuModProdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuModProdActionPerformed
@@ -1014,6 +1032,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem jCheckMenuMostraArchiviati;
     private javax.swing.JLabel jLabelStatusBar;
+    private javax.swing.JLabel jLedLabel;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
