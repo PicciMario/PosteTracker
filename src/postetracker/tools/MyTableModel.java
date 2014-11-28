@@ -31,7 +31,7 @@ import postetracker.Product;
  * @author m.piccinelli
  */
 public class MyTableModel extends AbstractTableModel {
-    private final String[] columnNames = new String[]{"Codice", "Descrizione/stato"};
+    private final String[] columnNames = new String[]{"Codice", "Descrizione/stato", ""};
     private Product[] data = new Product[]{};
     
     public Product getProductByRow(int row){
@@ -67,6 +67,14 @@ public class MyTableModel extends AbstractTableModel {
         else if (col == 1){
             return data[row].getDesc() + "\n" + data[row].getStatus();
         }
+        else if (col == 2){
+            if (data[row].getUrl().length() == 0) {
+                return "";
+            }
+            else{
+                return "->";
+            }
+        }
         return "";
     }
 
@@ -76,20 +84,14 @@ public class MyTableModel extends AbstractTableModel {
     }
 
 
-    /*
-     * Don't need to implement this method unless your table's
-     * editable.
-     */
-//    @Override
-//    public boolean isCellEditable(int row, int col) {
-//        //Note that the data/cell address is constant,
-//        //no matter where the cell appears onscreen.
-//        if (col < 2) {
-//            return false;
-//        } else {
-//            return true;
-//        }
-//    }
+    @Override
+    public boolean isCellEditable(int row, int col) {
+        if (col == 2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /*
      * Don't need to implement this method unless your table's

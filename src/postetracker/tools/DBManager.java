@@ -128,6 +128,26 @@ public class DBManager {
             }
         }     
         
+        // 28/11/14: added column "url" to table "products" ---------------------------------------
+        
+        try{
+            try (Statement stmt = conn.createStatement()) {
+                ResultSet rs = stmt.executeQuery("SELECT url FROM products LIMIT 1;");
+            }
+        } 
+        catch (SQLException e){
+            try{
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("ALTER TABLE products ADD COLUMN url TEXT;");
+                    System.out.println("Aggiunta colonna URL alla tabella PRODUCTS.");
+                }
+            }
+            catch (SQLException ex){
+                System.out.println(ex.toString());
+                System.exit(1);
+            }
+        }         
+        
         
     }
     
@@ -143,6 +163,11 @@ public class DBManager {
                     prod.setCode(rs.getString("code"));
                     prod.setDesc(rs.getString("desc"));
                     prod.setArchiveStatus(rs.getInt("archivestatus"));
+                    
+                    String url = rs.getString("url");
+                    if (url != null)
+                        prod.setUrl(url);
+                    
                     productList.add(prod);
                 }
             }
@@ -296,5 +321,19 @@ public class DBManager {
             System.out.println(e.toString());
         }          
     }
+    
+    public void updateProduct(Product product){
+        try{
+            PreparedStatement stmt = conn.prepareStatement("UPDATE products SET desc=?, url=? WHERE code = ?;");
+            stmt.setString(1, product.getDesc());
+            stmt.setString(2, product.getUrl());
+            stmt.setString(3, product.getCode());
+            stmt.executeUpdate();
+            stmt.close();
+        }
+        catch (SQLException e){
+            System.out.println(e.toString());
+        }          
+    }    
     
 }

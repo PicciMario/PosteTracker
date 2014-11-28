@@ -20,29 +20,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package postetracker;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author m.piccinelli
  */
-public class NewProduct extends javax.swing.JDialog {
-
-    PosteUI posteParent;
+public class EditProduct extends javax.swing.JDialog {
     
+    PosteUI posteParent;
+    Product prodotto;
+
     /**
-     * Creates new form NewProduct
-     * @param parent
-     * @param modal
+     * Creates new form EditProduct
      */
-    public NewProduct(java.awt.Frame parent, boolean modal) {
+    public EditProduct(java.awt.Frame parent, boolean modal, Product prod) {
         super(parent, modal);
         initComponents();
         
+        prodotto = prod;
         posteParent = (PosteUI)parent;
+        
+        jTextCodice.setText(prodotto.getCode());
+        jTextCommento.setText(prodotto.getDesc());
+        jTextUrl.setText(prodotto.getUrl());
     }
 
     /**
@@ -55,29 +59,28 @@ public class NewProduct extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
+        jTextCodice = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jTextNewCode = new javax.swing.JTextField();
-        jTextNewDesc = new javax.swing.JTextField();
+        jTextCommento = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
-        jTextNewUrl = new javax.swing.JTextField();
+        jTextUrl = new javax.swing.JTextField();
         jButtonAliexpressUrl = new javax.swing.JButton();
         jButtonClearUrl = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Nuovo codice");
+        setTitle("Modifica prodotto");
         setResizable(false);
 
         jLabel1.setText("Codice tracking:");
 
+        jTextCodice.setEditable(false);
+        jTextCodice.setText("jTextCodice");
+
         jLabel2.setText("Commento:");
 
-        jTextNewCode.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextNewCodeActionPerformed(evt);
-            }
-        });
+        jTextCommento.setText("jTextCommento");
 
         jButton1.setText("Salva");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -94,6 +97,8 @@ public class NewProduct extends javax.swing.JDialog {
         });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Indirizzo web"));
+
+        jTextUrl.setText("jTextUrl");
 
         jButtonAliexpressUrl.setText("AliExpress");
         jButtonAliexpressUrl.addActionListener(new java.awt.event.ActionListener() {
@@ -113,16 +118,16 @@ public class NewProduct extends javax.swing.JDialog {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTextNewUrl)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jButtonAliexpressUrl)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonClearUrl))
+            .addComponent(jTextUrl)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jTextNewUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jTextUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonAliexpressUrl)
@@ -137,18 +142,18 @@ public class NewProduct extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel1))
-                        .addGap(18, 18, 18)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextNewCode)
-                            .addComponent(jTextNewDesc))))
+                            .addComponent(jTextCodice)
+                            .addComponent(jTextCommento, javax.swing.GroupLayout.DEFAULT_SIZE, 293, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -157,11 +162,11 @@ public class NewProduct extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jTextNewCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextCodice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextNewDesc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextCommento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -175,84 +180,80 @@ public class NewProduct extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String newCode = jTextNewCode.getText().trim();
-        String newDesc = jTextNewDesc.getText().trim();
-        String newUrl = jTextNewUrl.getText().trim();
-        if (newDesc.length() == 0 || newCode.length() == 0){
-            JOptionPane.showMessageDialog(this, "Il codice e la descrizione non possono essere lasciati in bianco");
+        String newCode = jTextCodice.getText().trim();
+        String newDesc = jTextCommento.getText().trim();
+        String newUrl = jTextUrl.getText().trim();
+        
+        if (newDesc.length() == 0){
+            JOptionPane.showMessageDialog(this, "La descrizione non può essere lasciata in bianco.");
+            return;
         }
-        else{
-            Product prod = new Product();
-            prod.setCode(newCode);
-            prod.setDesc(newDesc);
-            prod.setUrl(newUrl);
-            int result = posteParent.newProduct(prod);
-            if (result == 0) JOptionPane.showMessageDialog(this, "Nuovo prodotto inserito.");
-            this.dispose();
-        }
+        
+        prodotto.setDesc(newDesc);
+        prodotto.setUrl(newUrl);
+        
+        int result = posteParent.updateProductInfo(prodotto);
+        if (result == 0) JOptionPane.showMessageDialog(this, "Modifiche salvate correttamente.");
+        this.dispose();        
         
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        this.dispose();
+        dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void jTextNewCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextNewCodeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextNewCodeActionPerformed
 
     private void jButtonAliexpressUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAliexpressUrlActionPerformed
         String ordCode = JOptionPane.showInputDialog("Product code");
-        if (ordCode != null){
-            jTextNewUrl.setText("http://trade.aliexpress.com/order_detail.htm?orderId=" + ordCode);
+        if (ordCode != null) {
+            jTextUrl.setText("http://trade.aliexpress.com/order_detail.htm?orderId=" + ordCode);
         }
     }//GEN-LAST:event_jButtonAliexpressUrlActionPerformed
 
     private void jButtonClearUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearUrlActionPerformed
-        jTextNewUrl.setText("");
+        jTextUrl.setText("");
     }//GEN-LAST:event_jButtonClearUrlActionPerformed
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(NewProduct.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(NewProduct.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(NewProduct.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(NewProduct.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                NewProduct dialog = new NewProduct(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(EditProduct.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(EditProduct.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(EditProduct.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(EditProduct.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the dialog */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                EditProduct dialog = new EditProduct(new javax.swing.JFrame(), true);
+//                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+//                    @Override
+//                    public void windowClosing(java.awt.event.WindowEvent e) {
+//                        System.exit(0);
+//                    }
+//                });
+//                dialog.setVisible(true);
+//            }
+//        });
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -262,8 +263,8 @@ public class NewProduct extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField jTextNewCode;
-    private javax.swing.JTextField jTextNewDesc;
-    private javax.swing.JTextField jTextNewUrl;
+    private javax.swing.JTextField jTextCodice;
+    private javax.swing.JTextField jTextCommento;
+    private javax.swing.JTextField jTextUrl;
     // End of variables declaration//GEN-END:variables
 }

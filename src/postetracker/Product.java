@@ -49,6 +49,9 @@ public class Product {
     /** Archive flag (1: product archived) */
     private int archive = 0;
     
+    /** product URL */
+    private String url = "";
+    
     private final SimpleDateFormat dateFormatParse = new SimpleDateFormat("dd-MMM-yyyy");
     private final SimpleDateFormat dateFormatPrint = new SimpleDateFormat("dd/MM/yyyy");
     
@@ -125,6 +128,22 @@ public class Product {
             archive = 1;
         else
             archive = 0;
+    }
+    
+    /**
+     * Sets the product URL
+     * @param newUrl the new URL
+     */
+    public void setUrl(String newUrl){
+        url = newUrl;
+    }
+    
+    /**
+     * Returns the product url.
+     * @return The actual product url
+     */
+    public String getUrl(){
+        return url;
     }
     
     /**

@@ -53,6 +53,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -73,9 +75,11 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import postetracker.tools.ButtonColumn;
 import postetracker.tools.DBManager;
 import postetracker.tools.MultiLineCellRenderer;
 import postetracker.tools.MyTableModel;
@@ -140,7 +144,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         Image logoImg = kit.createImage(logoUrl);
         setIconImage(logoImg);
         
-        // SECONDA TOOLBAR
+        // SECONDA TOOLBAR ------------------------------------------------------------------------
         
         // NEW button
         newStatusButton = new JButton();
@@ -174,7 +178,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         refreshGroup.add(jRefresh30);
         refreshGroup.add(jRefresh60);
         
-        // products list table configuration
+        // products list table configuration ------------------------------------------------------
+        
         MyTableModel model = new MyTableModel();
         model.setData(productList.toArray(new Product[0]));
         jTableLista.setModel(model);
@@ -186,7 +191,39 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         jTableLista.getColumnModel().getColumn(0).setMaxWidth(130);
         jTableLista.getColumnModel().getColumn(0).setPreferredWidth(130);
         
-        // statuses list table configuration
+        Action openUrl = new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                int modelRow = Integer.valueOf( e.getActionCommand() );
+                // retrieve product from list table model
+                MyTableModel model = (MyTableModel)jTableLista.getModel();
+                Product prod = model.getProductByRow(modelRow);
+                
+                String url = prod.getUrl();
+                
+                if (url.length() > 0){
+                    if (url.startsWith("http") == false){
+                        url = "http://" + url;
+                    }                    
+                    try {
+                        Desktop.getDesktop().browse(new URL(url).toURI());
+                    } catch (URISyntaxException | IOException ex) {
+                        JOptionPane.showMessageDialog(null, "Errore durante apertura pagina web: " + ex.toString());
+                    }                     
+                }
+                
+            }
+        };
+ 
+        ButtonColumn buttonColumn = new ButtonColumn(jTableLista, openUrl, 2);
+        
+        jTableLista.getColumnModel().getColumn(2).setMaxWidth(25);
+        jTableLista.getColumnModel().getColumn(2).setPreferredWidth(25);        
+        
+        // statuses list table configuration ------------------------------------------------------
+        
         TableDetailsModel model2 = new TableDetailsModel();
         model.setData(null);
         jTableDetails.setModel(model2);
@@ -202,7 +239,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         jTableDetails.getColumnModel().getColumn(0).setCellRenderer(rightRenderer);        
         jTableDetails.getColumnModel().getColumn(1).setCellRenderer(rightRenderer);        
         
-        // product list table onclick action
+        // product list table onclick action ------------------------------------------------------
+        
         jTableLista.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent event) {
@@ -228,7 +266,8 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
             }
         });
         
-        // default setting for refresh timer (30 min)
+        // default setting for refresh timer (30 min) ---------------------------------------------
+        
         refreshClock = new Timer();
         int mins = 30;
         refreshClock.schedule(new TimerThread(this), mins*60*1000, mins*60*1000);
@@ -327,6 +366,23 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         return 0;
         
     }
+    
+    /**
+     * Updates a {@link Product Product} and refreshes the main UI.
+     * @param product The product to update
+     * @return 0 if insertion successful, 1 otherwise.
+     */
+    public int updateProductInfo(Product product){
+        
+        // save product into database
+        dbManager.updateProduct(product);
+        
+        // update table data and visual
+        updateTableContent();
+        
+        return 0;
+        
+    }    
     
     /**
      * Updates the main table content by:
@@ -601,6 +657,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         jMenu1 = new javax.swing.JMenu();
         jMenuNewProd = new javax.swing.JMenuItem();
         jMenuDelProd = new javax.swing.JMenuItem();
+        jMenuModProd = new javax.swing.JMenuItem();
         jMenuArchivia = new javax.swing.JMenuItem();
         jCheckMenuMostraArchiviati = new javax.swing.JCheckBoxMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
@@ -679,6 +736,15 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
             }
         });
         jMenu1.add(jMenuDelProd);
+
+        jMenuModProd.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuModProd.setText("Modifica prodotto...");
+        jMenuModProd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuModProdActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuModProd);
 
         jMenuArchivia.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, 0));
         jMenuArchivia.setText("Archivia/disarchivia");
@@ -891,6 +957,21 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         System.out.println("Scheduled timed refresh in " + mins + " minutes...");
     }//GEN-LAST:event_jRefresh30ActionPerformed
 
+    private void jMenuModProdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuModProdActionPerformed
+        // get selected product
+        if (jTableLista.getSelectedRow() == -1) {
+            return;
+        }
+        MyTableModel model = (MyTableModel)jTableLista.getModel();
+        Product prod = model.getProductByRow(jTableLista.getSelectedRow());
+        
+        if (prod != null){
+            EditProduct dialog = new EditProduct(this, true, prod);
+            dialog.setVisible(true);
+        }
+        
+    }//GEN-LAST:event_jMenuModProdActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -941,6 +1022,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
     private javax.swing.JMenuItem jMenuArchivia;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuDelProd;
+    private javax.swing.JMenuItem jMenuModProd;
     private javax.swing.JMenuItem jMenuNewProd;
     private javax.swing.JMenuItem jMenuQuit;
     private javax.swing.JRadioButtonMenuItem jRefresh10;
