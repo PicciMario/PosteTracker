@@ -102,7 +102,7 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
     PosteNewsWindow posteNewsWindow = new PosteNewsWindow(this, false);
     
     // elementi seconda toolbar
-    JButton newStatusButton, deleteStatusButton, webButton;
+    JButton newStatusButton, deleteStatusButton, webButton, webButton2;
     
     Timer refreshClock;
     
@@ -169,14 +169,23 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
         deleteStatusButton.setToolTipText("Elimina lo status evidenziato...");
         deleteStatusButton.addActionListener(this);
         jToolBar2.add(deleteStatusButton);     
-        
+           
         // WEB button
         webButton = new JButton();
         webButton.setIcon(aboutIcon);
         webButton.setText("Vedi su Poste.it");
         webButton.setToolTipText("Vedi su Poste.it...");
         webButton.addActionListener(this);
-        jToolBar2.add(webButton);          
+        jToolBar2.add(webButton);     
+        
+        
+        // WEB button 2
+        webButton2 = new JButton();
+        webButton2.setIcon(aboutIcon);
+        webButton2.setText("Vedi su 17track.net");
+        webButton2.setToolTipText("Vedi su 17track.net...");
+        webButton2.addActionListener(this);
+        jToolBar2.add(webButton2);          
         
         
         // button group for refresh menu
@@ -1114,6 +1123,27 @@ public class PosteUI extends javax.swing.JFrame implements ActionListener {
             }              
 
         }
+        
+        else if (e.getSource() == webButton2){
+            // get selected product
+            if (jTableLista.getSelectedRow() == -1) {
+                return;
+            }
+            
+            MyTableModel model = (MyTableModel)jTableLista.getModel();
+            Product prod = model.getProductByRow(jTableLista.getSelectedRow());            
+            
+            String baseUrl1 = "http://www.17track.net/en/result/post.shtml?nums=";
+            String baseUrl2 = "";
+            String url = baseUrl1 + prod.getCode() + baseUrl2;
+            
+            try {
+                Desktop.getDesktop().browse(new URL(url).toURI());
+            } catch (URISyntaxException | IOException ex) {
+                JOptionPane.showMessageDialog(null, "Errore durante apertura pagina web: " + ex.toString());
+            }              
+
+        }        
         
     }
 
