@@ -60,7 +60,7 @@ public class PosteAbout extends javax.swing.JDialog {
         jLabel1.setText("Poste Tracker");
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Versione 1.2 - Novembre 2014");
+        jLabel2.setText("Versione 1.3 - Dicembre 2014");
 
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel3.setText("http://piccimario.github.io/PosteTracker/");
